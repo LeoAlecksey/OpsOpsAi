@@ -3,7 +3,8 @@
 
 import { icons } from "./icons";
 import type { AppInfo } from "./ipc";
-import { escapeHtml, modelStatus, promoCard, type PromoCard } from "./view";
+import { donateOpen, logsOpen, logUi } from "./ipc";
+import { aboutLine, escapeHtml, modelStatus, promoCard, type PromoCard } from "./view";
 
 function contextBlock(): string {
   return `
@@ -53,7 +54,8 @@ function sidebar(info: AppInfo | null): string {
       ${skillBlock()}
       ${promoBlock(promoCard([]))}
       <div class="side-footer">
-        <button class="icon-btn" type="button" disabled title="Настройки">${icons.settings}</button>
+        <button class="icon-btn" id="open-settings" type="button" title="Настройки">${icons.settings}</button>
+        <button class="donate-link" id="donate-side" type="button" title="Поддержать разработку через ЮMoney">${icons.heart}<span>Поддержать</span></button>
         <span class="version">${version}</span>
       </div>
     </nav>`;
@@ -89,8 +91,33 @@ function chat(): string {
     </main>`;
 }
 
+function settingsDialog(info: AppInfo | null): string {
+  return `
+    <dialog class="settings" id="settings" aria-labelledby="settings-title">
+      <header class="settings-head">
+        <h2 id="settings-title">Настройки</h2>
+        <button class="icon-btn" id="close-settings" type="button" title="Закрыть">${icons.close}</button>
+      </header>
+      <section class="settings-section">
+        <h3>О приложении</h3>
+        <p class="muted">${escapeHtml(aboutLine(info))}</p>
+        <button class="btn" id="open-logs" type="button" ${info ? "" : "disabled"}>${icons.logs}<span>Открыть папку журналов</span></button>
+      </section>
+      <section class="settings-section donate-card">
+        <h3>Поддержать проект</h3>
+        <p class="muted">OpsOpsAi бесплатный. Если приложение вам полезно, можно поддержать разработку.</p>
+        <button class="btn btn-accent" id="donate-settings" type="button">${icons.heart}<span>Поддержать через ЮMoney</span></button>
+      </section>
+    </dialog>`;
+}
+
+/** Runs a button action and reports a failure in the log instead of failing silently. */
+function action(run: () => Promise<void>, what: string): () => void {
+  return () => void run().catch((e) => logUi("error", `${what}: ${String(e)}`));
+}
+
 export function mountShell(root: HTMLElement, info: AppInfo | null): void {
-  root.innerHTML = `<div class="app" id="layout">${sidebar(info)}${chat()}</div>`;
+  root.innerHTML = `<div class="app" id="layout">${sidebar(info)}${chat()}</div>${settingsDialog(info)}`;
   const layout = root.querySelector<HTMLElement>("#layout")!;
   const expand = root.querySelector<HTMLButtonElement>("#expand")!;
   const setCollapsed = (on: boolean) => {
@@ -100,4 +127,16 @@ export function mountShell(root: HTMLElement, info: AppInfo | null): void {
   root.querySelector("#collapse")!.addEventListener("click", () => setCollapsed(true));
   expand.addEventListener("click", () => setCollapsed(false));
   root.querySelector("#composer")!.addEventListener("submit", (ev) => ev.preventDefault());
+
+  const settings = root.querySelector<HTMLDialogElement>("#settings")!;
+  root.querySelector("#open-settings")!.addEventListener("click", () => settings.showModal());
+  root.querySelector("#close-settings")!.addEventListener("click", () => settings.close());
+  // a click on the backdrop (outside the panel) closes the dialog
+  settings.addEventListener("click", (ev) => {
+    if (ev.target === settings) settings.close();
+  });
+  const donate = action(donateOpen, "donate");
+  root.querySelector("#donate-side")!.addEventListener("click", donate);
+  root.querySelector("#donate-settings")!.addEventListener("click", donate);
+  root.querySelector("#open-logs")!.addEventListener("click", action(logsOpen, "logs"));
 }

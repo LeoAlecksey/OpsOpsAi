@@ -16,6 +16,16 @@ pub struct AppInfo {
     pub arch: &'static str,
 }
 
+/// The author's YooMoney wallet for donations. Fixed here on purpose: the UI only asks to open
+/// "the donation page" and cannot pass a URL of its own, so a bug or injected script in the
+/// webview cannot send people to a different wallet.
+pub const DONATE_URL: &str = "https://yoomoney.ru/to/4100119645604976";
+
+#[tauri::command]
+fn donate_open() -> Result<(), String> {
+    store::open_with_system(DONATE_URL)
+}
+
 #[tauri::command]
 fn app_info(app: tauri::AppHandle) -> AppInfo {
     let pkg = app.package_info();
@@ -38,6 +48,7 @@ pub fn run() {
         })
         .invoke_handler(diag::track(tauri::generate_handler![
             app_info,
+            donate_open,
             diag::log_ui,
             diag::logs_open,
             diag::logs_tail,
@@ -45,4 +56,14 @@ pub fn run() {
         ]))
         .run(tauri::generate_context!())
         .expect("error while running OpsOpsAi");
+}
+
+#[cfg(test)]
+mod tests {
+    /// Guard against an accidental or malicious change of the wallet: changing it must be a
+    /// deliberate edit of this test as well.
+    #[test]
+    fn the_donation_link_is_the_authors_wallet() {
+        assert_eq!(super::DONATE_URL, "https://yoomoney.ru/to/4100119645604976");
+    }
 }

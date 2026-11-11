@@ -223,6 +223,67 @@ button:disabled { cursor: not-allowed; }
 .send:disabled { background: var(--surface-3); color: var(--muted); }
 .hint { margin-top: 8px; text-align: center; color: var(--muted); font-size: 12px; }
 
+/* ---------- donate ---------- */
+.donate-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.donate-link .ico { width: 15px; height: 15px; color: #f28ba8; }
+.donate-link:hover { background: rgba(242, 139, 168, 0.12); color: var(--text); }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-weight: 550;
+}
+.btn .ico { width: 16px; height: 16px; }
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { color: var(--muted); }
+.btn-accent { border-color: transparent; background: var(--accent); color: var(--bg); }
+.btn-accent:hover:not(:disabled) { border-color: transparent; filter: brightness(1.08); }
+
+/* ---------- settings ---------- */
+.settings {
+  width: min(520px, calc(100vw - 48px));
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+}
+.settings::backdrop { background: rgba(5, 6, 10, 0.6); }
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 6px 20px;
+}
+.settings-head h2 { margin: 0; font-size: 18px; font-weight: 650; }
+.settings-section { padding: 12px 20px 18px; border-top: 1px solid var(--border); }
+.settings-section:first-of-type { border-top: 0; }
+.settings-section h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.settings-section p { margin: 0 0 12px; }
+.muted { color: var(--text-2); }
+.donate-card {
+  margin: 0 12px 12px;
+  border: 1px solid rgba(155, 140, 255, 0.25);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(155, 140, 255, 0.12), rgba(242, 139, 168, 0.08));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app { transition: none; }
 }
