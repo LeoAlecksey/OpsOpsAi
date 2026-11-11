@@ -1,21 +1,107 @@
-OpsOpsAi — Proprietary Software
+Лицензия OpsOpsAi на исходный код — «Только для чтения»
+OpsOpsAi Source License — "View Only"
 
-Copyright (c) 2026 LeoAlecksey. All rights reserved.
+Copyright (c) 2026 LeoAlecksey. Все права защищены. All rights reserved.
 
-This software and its source code are the confidential property of the copyright
-holder. No license, express or implied, is granted to use, copy, modify, merge,
-publish, distribute, sublicense or sell copies of the source code without prior
-written permission of the copyright holder.
+================================================================================
+РУССКИЙ ТЕКСТ (имеет преимущественную силу)
+================================================================================
 
-Use of compiled releases of OpsOpsAi is governed by the end-user terms published
-together with those releases.
+1. Предмет. Настоящая лицензия распространяется на исходный код, документацию,
+   изображения, иконки и иные материалы в этом репозитории («Исходный код»),
+   за исключением сторонних компонентов, перечисленных в THIRD_PARTY_NOTICES.md,
+   которые распространяются на условиях своих лицензий.
 
-Third-party components included in OpsOpsAi are distributed under their own
-licenses; see THIRD_PARTY_NOTICES.md.
+2. Разрешено. Правообладатель разрешает вам только:
+   а) просматривать и читать Исходный код в этом репозитории;
+   б) ссылаться на репозиторий и цитировать небольшие фрагменты в объёме,
+      необходимом для обсуждения, обзора или сообщения об ошибке, с указанием
+      источника.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
-OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+3. Запрещено без предварительного письменного разрешения правообладателя:
+   а) копировать, воспроизводить или скачивать Исходный код с целью
+      использования (кроме автоматического кэширования при просмотре);
+   б) изменять Исходный код, создавать производные произведения;
+   в) использовать Исходный код или его части в любом другом программном
+      обеспечении, продукте или сервисе, в том числе коммерческом;
+   г) собирать, компилировать, запускать или распространять сборки из
+      Исходного кода, в том числе изменённые;
+   д) распространять, публиковать, сублицензировать, продавать, сдавать в
+      аренду или иным образом передавать Исходный код третьим лицам;
+   е) использовать Исходный код для обучения, дообучения или оценки моделей
+      машинного обучения и для создания наборов данных;
+   ж) удалять или изменять уведомления об авторском праве и эту лицензию.
+
+4. Готовые сборки. Официальные сборки OpsOpsAi, опубликованные
+   правообладателем, предоставляются бесплатно на условиях, опубликованных
+   вместе с ними. Настоящая лицензия не даёт прав на Исходный код сверх
+   пункта 2.
+
+5. Форки на GitHub. Возможность создать форк средствами GitHub, если она
+   предусмотрена правилами GitHub, не даёт никаких прав сверх пункта 2:
+   форк можно только просматривать.
+
+6. Предложения изменений. Отправляя в репозиторий изменения (pull request,
+   патч, issue с кодом), вы передаёте правообладателю безвозмездное,
+   бессрочное, неисключительное право использовать, изменять и распространять
+   их на любых условиях и подтверждаете, что имеете право это сделать.
+
+7. Прекращение. При нарушении условий лицензия прекращается автоматически.
+   Правообладатель оставляет за собой все права, прямо не предоставленные
+   настоящей лицензией.
+
+8. Отказ от гарантий. Исходный код предоставляется «как есть», без каких-либо
+   гарантий. Правообладатель не несёт ответственности за любой ущерб,
+   связанный с Исходным кодом.
+
+Разрешения сверх этой лицензии: связаться с правообладателем через GitHub
+(https://github.com/LeoAlecksey).
+
+================================================================================
+ENGLISH TRANSLATION (the Russian text prevails in case of discrepancy)
+================================================================================
+
+1. Scope. This license covers the source code, documentation, images, icons and
+   other materials in this repository (the "Source Code"), except third-party
+   components listed in THIRD_PARTY_NOTICES.md, which remain under their own
+   licenses.
+
+2. Permitted. You may only:
+   a) view and read the Source Code in this repository;
+   b) link to the repository and quote small excerpts as needed for discussion,
+      review or bug reports, with attribution.
+
+3. Prohibited without prior written permission of the copyright holder:
+   a) copying, reproducing or downloading the Source Code for use (other than
+      automatic caching while viewing);
+   b) modifying the Source Code or creating derivative works;
+   c) using the Source Code or any part of it in any other software, product or
+      service, commercial or not;
+   d) building, compiling, running or distributing builds made from the Source
+      Code, modified or not;
+   e) distributing, publishing, sublicensing, selling, renting or otherwise
+      transferring the Source Code to third parties;
+   f) using the Source Code to train, fine-tune or evaluate machine-learning
+      models or to create datasets;
+   g) removing or altering copyright notices or this license.
+
+4. Official builds. Official OpsOpsAi builds published by the copyright holder
+   are provided free of charge under the terms published with them. This
+   license grants no rights to the Source Code beyond section 2.
+
+5. GitHub forks. The ability to fork through GitHub, where GitHub's terms
+   provide it, grants no rights beyond section 2: a fork may only be viewed.
+
+6. Contributions. By submitting changes (pull request, patch, issue with code)
+   you grant the copyright holder a free, perpetual, non-exclusive right to use,
+   modify and distribute them under any terms, and confirm you have the right
+   to do so.
+
+7. Termination. Any breach terminates this license automatically. All rights
+   not expressly granted are reserved.
+
+8. No warranty. The Source Code is provided "as is", without warranty of any
+   kind. The copyright holder is not liable for any damages arising from it.
+
+Permissions beyond this license: contact the copyright holder via GitHub
+(https://github.com/LeoAlecksey).

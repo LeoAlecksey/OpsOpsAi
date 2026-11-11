@@ -1,7 +1,7 @@
 //! OpsOpsAi backend: app assembly, IPC commands, managed state.
 //!
 //! Каркас Phase 1: диагностика и настройки. Runtime локального ИИ, модели и
-//! чат появятся в Phase 2 за отдельными модулями (см. docs/ARCHITECTURE.md).
+//! чат появятся в Phase 2 за отдельными модулями.
 
 pub mod diag;
 pub mod store;

@@ -1,7 +1,7 @@
 //! Shared persistence: JSON files in the app's config folder, written atomically with a backup copy.
 //!
-//! Origin: adapted from OpsDeck `src-tauri/src/store.rs` (fragments by the same author only, see
-//! docs/OPSDECK_REUSE_AUDIT.md §6). Keyring helpers come back with the first secret that needs them.
+//! Origin: adapted from OpsDeck `src-tauri/src/store.rs` (fragments by the same author only).
+//! Keyring helpers come back with the first secret that needs them.
 
 use serde::{de::DeserializeOwned, Serialize};
 use std::{

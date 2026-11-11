@@ -11,8 +11,7 @@ release. Until then this file summarises what was checked on 2026-11-11.
 
 Fragments of `src-tauri/src/store.rs` and `src-tauri/src/diag.rs` are adapted from
 OpsDeck (https://github.com/LeoAlecksey/opsdeck), written by the same copyright holder.
-No code by other OpsDeck contributors is included (checked with `git blame`, see
-`docs/OPSDECK_REUSE_AUDIT.md` §6).
+No code by other OpsDeck contributors is included (checked with `git blame`).
 
 ## Rust crates (src-tauri, 427 third-party packages in Cargo.lock)
 
