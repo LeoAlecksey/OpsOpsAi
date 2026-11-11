@@ -18,5 +18,6 @@ export const icons = {
   chevron: svg(`<path d="m7 10 5 5 5-5"/>`),
   heart: svg(`<path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10z"/>`),
   close: svg(`<path d="M6 6l12 12M18 6 6 18"/>`),
+  update: svg(`<path d="M20 12a8 8 0 1 1-2.3-5.6M20 4.5v4h-4"/>`),
   logs: svg(`<path d="M7 4.5h7l4 4v11H7z"/><path d="M14 4.5v4h4M10 12.5h5M10 15.5h5"/>`),
 };

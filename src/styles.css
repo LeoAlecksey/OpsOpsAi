@@ -238,6 +238,33 @@ button:disabled { cursor: not-allowed; }
 .donate-link .ico { width: 15px; height: 15px; color: #f28ba8; }
 .donate-link:hover { background: rgba(242, 139, 168, 0.12); color: var(--text); }
 
+/* ---------- update ---------- */
+.update-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  border-radius: var(--radius-sm);
+  background: rgba(79, 209, 197, 0.1);
+  color: var(--accent-2);
+  font-weight: 550;
+  text-align: left;
+}
+.update-pill .ico { width: 16px; height: 16px; }
+.update-pill:hover { background: rgba(79, 209, 197, 0.16); }
+.update-notes {
+  max-height: 140px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+
 /* ---------- buttons ---------- */
 .btn {
   display: inline-flex;

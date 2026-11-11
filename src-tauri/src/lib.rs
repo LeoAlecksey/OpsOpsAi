@@ -5,6 +5,7 @@
 
 pub mod diag;
 pub mod store;
+pub mod updater;
 
 use serde::Serialize;
 
@@ -41,6 +42,7 @@ pub fn run() {
     diag::install_panic_hook();
     tauri::Builder::default()
         .plugin(diag::log_plugin())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             diag::start_watchdog(app.handle().clone());
             log::info!("OpsOpsAi {} started on {}/{}", app.package_info().version, std::env::consts::OS, std::env::consts::ARCH);
@@ -49,6 +51,8 @@ pub fn run() {
         .invoke_handler(diag::track(tauri::generate_handler![
             app_info,
             donate_open,
+            updater::update_check,
+            updater::update_install,
             diag::log_ui,
             diag::logs_open,
             diag::logs_tail,

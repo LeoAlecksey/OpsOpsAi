@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aboutLine, escapeHtml, modelStatus, promoCard, PROMO_PLACEHOLDER } from "../../src/view";
+import { aboutLine, escapeHtml, modelStatus, promoCard, PROMO_PLACEHOLDER, updateProgressText, updateStatusText } from "../../src/view";
 
 describe("promo slot", () => {
   it("shows the placeholder until cards are loaded", () => {
@@ -32,5 +32,19 @@ describe("about line", () => {
 
   it("says when there is no backend", () => {
     expect(aboutLine(null)).toBe("Запущено в браузере, без бэкенда");
+  });
+});
+
+describe("updates", () => {
+  it("says what the check found", () => {
+    expect(updateStatusText({ current: "0.1.0", available: true, version: "0.2.0" })).toBe("Доступна версия 0.2.0");
+    expect(updateStatusText({ current: "0.1.0", available: false, version: null })).toBe("Установлена последняя версия (0.1.0)");
+    expect(updateStatusText(null)).toBe("Обновления проверяются только в установленном приложении");
+  });
+
+  it("shows download progress in megabytes and percent", () => {
+    expect(updateProgressText({ downloaded: 5 * 1048576, total: 10 * 1048576 })).toBe("Скачано 5.0 МБ из 10.0 МБ (50%)");
+    expect(updateProgressText({ downloaded: 1048576, total: null })).toBe("Скачано 1.0 МБ");
+    expect(updateProgressText({ installing: true })).toBe("Устанавливаю, приложение перезапустится…");
   });
 });

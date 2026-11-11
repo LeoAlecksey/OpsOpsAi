@@ -33,6 +33,25 @@ export function aboutLine(info: { name: string; version: string; os: string; arc
   return info ? `${info.name} ${info.version} · ${info.os} ${info.arch}` : "Запущено в браузере, без бэкенда";
 }
 
+/** Bytes as "12.3 МБ". */
+export function formatMb(bytes: number): string {
+  return `${(bytes / 1048576).toFixed(1)} МБ`;
+}
+
+/** Progress line while an update downloads and installs. */
+export function updateProgressText(p: { downloaded?: number; total?: number | null; installing?: boolean }): string {
+  if (p.installing) return "Устанавливаю, приложение перезапустится…";
+  const done = p.downloaded ?? 0;
+  if (p.total) return `Скачано ${formatMb(done)} из ${formatMb(p.total)} (${Math.min(100, Math.round((done / p.total) * 100))}%)`;
+  return `Скачано ${formatMb(done)}`;
+}
+
+/** The result of an update check in words. */
+export function updateStatusText(info: { current: string; available: boolean; version: string | null } | null): string {
+  if (!info) return "Обновления проверяются только в установленном приложении";
+  return info.available && info.version ? `Доступна версия ${info.version}` : `Установлена последняя версия (${info.current})`;
+}
+
 /** Status line under the model picker. */
 export function modelStatus(installed: boolean): string {
   return installed ? "Модель готова" : "Модель не установлена";
