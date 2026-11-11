@@ -1,0 +1,6 @@
+# The Rust version for OpsOpsAi: local builds and CI (ci.yml installs exactly this one).
+# Raising it is a commit of its own, with a full CI run on all platforms.
+[toolchain]
+channel = "1.93.1"
+components = ["clippy"]
+profile = "minimal"

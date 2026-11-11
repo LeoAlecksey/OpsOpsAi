@@ -1,0 +1,108 @@
+// The app frame: sidebar (history, context, skill, promo slot) and the chat area.
+// Phase 1 is the frame only: actions that need a model are shown disabled and say why.
+
+import { icons } from "./icons";
+import type { AppInfo, Entitlements } from "./ipc";
+import { escapeHtml, locked, modelStatus, promoCard, type PromoCard } from "./view";
+
+const proBadge = `<span class="badge-pro" title="Доступно в Pro">${icons.lock}Pro</span>`;
+
+function contextBlock(e: Entitlements): string {
+  const folders = locked(e, "folders");
+  return `
+    <section class="side-block">
+      <div class="side-label">${icons.layers}<span>Контекст</span></div>
+      <button class="picker" type="button" disabled title="Появится вместе с локальной моделью">
+        <span>Без контекста</span>${icons.chevron}
+      </button>
+      <button class="picker picker-ghost" type="button" disabled>
+        ${icons.folder}<span>Папка или проект</span>${folders ? proBadge : ""}
+      </button>
+    </section>`;
+}
+
+function skillBlock(e: Entitlements): string {
+  return `
+    <section class="side-block">
+      <div class="side-label">${icons.spark}<span>Скилл</span>${locked(e, "skills") ? proBadge : ""}</div>
+      <button class="picker" type="button" disabled title="Появится вместе с локальной моделью">
+        <span>Обычный чат</span>${icons.chevron}
+      </button>
+    </section>`;
+}
+
+function promoBlock(card: PromoCard | null): string {
+  // the slot stays in the layout even when empty, so filling it later does not move anything
+  if (!card) return `<aside class="promo" id="promo" hidden></aside>`;
+  return `
+    <aside class="promo" id="promo" aria-label="Рекомендации">
+      <div class="promo-title">${escapeHtml(card.title)}</div>
+      <div class="promo-text">${escapeHtml(card.text)}</div>
+    </aside>`;
+}
+
+function sidebar(e: Entitlements, info: AppInfo | null): string {
+  const version = info ? `v${escapeHtml(info.version)}` : "браузер";
+  return `
+    <nav class="sidebar" id="sidebar" aria-label="Чаты">
+      <div class="brand">
+        ${icons.logo}<span class="brand-name">OpsOpsAi</span>
+        <button class="icon-btn" id="collapse" type="button" title="Скрыть панель">${icons.panel}</button>
+      </div>
+      <button class="new-chat" type="button" disabled title="Появится вместе с локальной моделью">${icons.plus}<span>Новый чат</span></button>
+      <label class="search">${icons.search}<input type="search" placeholder="Поиск по чатам" disabled /></label>
+      <div class="history">
+        <div class="history-empty">Чатов пока нет</div>
+      </div>
+      ${contextBlock(e)}
+      ${skillBlock(e)}
+      ${promoBlock(promoCard(e, []))}
+      <div class="side-footer">
+        <button class="icon-btn" type="button" disabled title="Настройки">${icons.settings}</button>
+        <span class="version">${version}</span>
+      </div>
+    </nav>`;
+}
+
+function chat(): string {
+  return `
+    <main class="chat">
+      <header class="topbar">
+        <button class="icon-btn" id="expand" type="button" title="Показать панель" hidden>${icons.panel}</button>
+        <button class="model-picker" type="button" disabled title="Модели появятся в следующей версии">
+          ${icons.chip}<span class="model-name">Модель не выбрана</span>${icons.chevron}
+        </button>
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status">${modelStatus(false)}</span>
+      </header>
+      <section class="empty">
+        <h1>Чем помочь?</h1>
+        <p>Локальный ИИ работает на этом компьютере. Чат станет доступен после установки модели.</p>
+      </section>
+      <form class="composer" id="composer">
+        <div class="composer-box">
+          <textarea id="prompt" rows="1" placeholder="Спросите что-нибудь…" disabled></textarea>
+          <div class="composer-row">
+            <button class="icon-btn" type="button" disabled title="Прикрепить файл">${icons.paperclip}</button>
+            <button class="icon-btn" type="button" disabled title="Прикрепить папку">${icons.folder}</button>
+            <span class="spacer"></span>
+            <button class="send" type="submit" disabled title="Отправить">${icons.send}</button>
+          </div>
+        </div>
+        <div class="hint">Ответы генерируются локально и не покидают компьютер.</div>
+      </form>
+    </main>`;
+}
+
+export function mountShell(root: HTMLElement, e: Entitlements, info: AppInfo | null): void {
+  root.innerHTML = `<div class="app" id="layout">${sidebar(e, info)}${chat()}</div>`;
+  const layout = root.querySelector<HTMLElement>("#layout")!;
+  const expand = root.querySelector<HTMLButtonElement>("#expand")!;
+  const setCollapsed = (on: boolean) => {
+    layout.classList.toggle("collapsed", on);
+    expand.hidden = !on;
+  };
+  root.querySelector("#collapse")!.addEventListener("click", () => setCollapsed(true));
+  expand.addEventListener("click", () => setCollapsed(false));
+  root.querySelector("#composer")!.addEventListener("submit", (ev) => ev.preventDefault());
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "IPC for the main window only. Future windows with external content get no IPC.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

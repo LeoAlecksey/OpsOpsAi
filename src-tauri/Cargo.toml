@@ -1,0 +1,31 @@
+[package]
+name = "opsopsai"
+version = "0.1.0"
+edition = "2021"
+description = "OpsOpsAi — desktop app for local AI and agents (Tauri backend)"
+license = "LicenseRef-Proprietary"
+authors = ["LeoAlecksey"]
+publish = false
+
+[lib]
+name = "opsopsai_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+# Минимум для каркаса. Зависимости следующих шагов (reqwest, keyring, sha2, tar/zip для runtime)
+# добавляются вместе с кодом, которому они нужны, — не заранее.
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+tauri-plugin-log = "2"
+dirs = "6"
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
