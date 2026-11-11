@@ -1,5 +1,5 @@
 # Checks and test builds. Publishes nothing: releases, signing and the public release repo come
-# in a separate step (docs/ROADMAP.md, Phase 1).
+# in a separate step.
 name: ci
 
 on:
@@ -73,7 +73,7 @@ jobs:
           - name: windows-x64
             os: windows-2022
           - name: macos-arm64
-            os: macos-14
+            os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
