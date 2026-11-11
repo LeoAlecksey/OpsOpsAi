@@ -1,10 +1,9 @@
 //! OpsOpsAi backend: app assembly, IPC commands, managed state.
 //!
-//! Каркас Phase 1: диагностика, настройки, права (Entitlements). Runtime локального ИИ, модели и
+//! Каркас Phase 1: диагностика и настройки. Runtime локального ИИ, модели и
 //! чат появятся в Phase 2 за отдельными модулями (см. docs/ARCHITECTURE.md).
 
 pub mod diag;
-pub mod entitlements;
 pub mod store;
 
 use serde::Serialize;
@@ -39,7 +38,6 @@ pub fn run() {
         })
         .invoke_handler(diag::track(tauri::generate_handler![
             app_info,
-            entitlements::entitlements_get,
             diag::log_ui,
             diag::logs_open,
             diag::logs_tail,

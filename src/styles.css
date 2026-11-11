@@ -12,7 +12,6 @@
   --muted: #6f7790;
   --accent: #9b8cff;
   --accent-2: #4fd1c5;
-  --accent-soft: rgba(155, 140, 255, 0.14);
   --warn: #f2b35b;
   --radius: 12px;
   --radius-sm: 8px;
@@ -114,7 +113,6 @@ button:disabled { cursor: not-allowed; }
   letter-spacing: 0.6px;
 }
 .side-label .ico { width: 15px; height: 15px; }
-.side-label .badge-pro { margin-left: auto; }
 
 .picker {
   display: flex;
@@ -126,26 +124,11 @@ button:disabled { cursor: not-allowed; }
   background: var(--surface-2);
   text-align: left;
 }
-.picker > span:not(.badge-pro) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.picker .badge-pro { flex: none; }
+.picker > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .picker .ico { width: 16px; height: 16px; color: var(--muted); }
 .picker:disabled { color: var(--text-2); }
 .picker-ghost { background: transparent; border-style: dashed; }
 
-.badge-pro {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
-}
-.badge-pro .ico { width: 11px; height: 11px; }
 
 .promo {
   padding: 12px;

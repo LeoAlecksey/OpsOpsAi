@@ -1,8 +1,6 @@
 // Pure helpers for the UI: decisions live here and are covered by tests/unit, the DOM code in
 // shell.ts only applies them.
 
-import type { Entitlements } from "./ipc";
-
 /** Text for HTML markup built from strings. */
 export function escapeHtml(s: string): string {
   return s
@@ -11,13 +9,6 @@ export function escapeHtml(s: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
-}
-
-export type ProFeature = "skills" | "folders";
-
-/** A Pro feature shown with a lock on the free plan. */
-export function locked(e: Entitlements, feature: ProFeature): boolean {
-  return !e[feature];
 }
 
 /** One card of the own promo slot (courses, channels). Loaded from a signed feed later. */
@@ -32,9 +23,8 @@ export const PROMO_PLACEHOLDER: PromoCard = {
   text: "Здесь появятся курсы и материалы по работе с локальным ИИ.",
 };
 
-/** What the promo slot shows: nothing on Pro, otherwise the first card or the placeholder. */
-export function promoCard(e: Entitlements, cards: readonly PromoCard[]): PromoCard | null {
-  if (!e.showPromo) return null;
+/** What the promo slot shows: the first loaded card or the placeholder. */
+export function promoCard(cards: readonly PromoCard[]): PromoCard {
   return cards[0] ?? PROMO_PLACEHOLDER;
 }
 

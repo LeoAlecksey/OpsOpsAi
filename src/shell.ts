@@ -2,13 +2,10 @@
 // Phase 1 is the frame only: actions that need a model are shown disabled and say why.
 
 import { icons } from "./icons";
-import type { AppInfo, Entitlements } from "./ipc";
-import { escapeHtml, locked, modelStatus, promoCard, type PromoCard } from "./view";
+import type { AppInfo } from "./ipc";
+import { escapeHtml, modelStatus, promoCard, type PromoCard } from "./view";
 
-const proBadge = `<span class="badge-pro" title="Доступно в Pro">${icons.lock}Pro</span>`;
-
-function contextBlock(e: Entitlements): string {
-  const folders = locked(e, "folders");
+function contextBlock(): string {
   return `
     <section class="side-block">
       <div class="side-label">${icons.layers}<span>Контекст</span></div>
@@ -16,24 +13,22 @@ function contextBlock(e: Entitlements): string {
         <span>Без контекста</span>${icons.chevron}
       </button>
       <button class="picker picker-ghost" type="button" disabled>
-        ${icons.folder}<span>Папка или проект</span>${folders ? proBadge : ""}
+        ${icons.folder}<span>Папка или проект</span>
       </button>
     </section>`;
 }
 
-function skillBlock(e: Entitlements): string {
+function skillBlock(): string {
   return `
     <section class="side-block">
-      <div class="side-label">${icons.spark}<span>Скилл</span>${locked(e, "skills") ? proBadge : ""}</div>
+      <div class="side-label">${icons.spark}<span>Скилл</span></div>
       <button class="picker" type="button" disabled title="Появится вместе с локальной моделью">
         <span>Обычный чат</span>${icons.chevron}
       </button>
     </section>`;
 }
 
-function promoBlock(card: PromoCard | null): string {
-  // the slot stays in the layout even when empty, so filling it later does not move anything
-  if (!card) return `<aside class="promo" id="promo" hidden></aside>`;
+function promoBlock(card: PromoCard): string {
   return `
     <aside class="promo" id="promo" aria-label="Рекомендации">
       <div class="promo-title">${escapeHtml(card.title)}</div>
@@ -41,7 +36,7 @@ function promoBlock(card: PromoCard | null): string {
     </aside>`;
 }
 
-function sidebar(e: Entitlements, info: AppInfo | null): string {
+function sidebar(info: AppInfo | null): string {
   const version = info ? `v${escapeHtml(info.version)}` : "браузер";
   return `
     <nav class="sidebar" id="sidebar" aria-label="Чаты">
@@ -54,9 +49,9 @@ function sidebar(e: Entitlements, info: AppInfo | null): string {
       <div class="history">
         <div class="history-empty">Чатов пока нет</div>
       </div>
-      ${contextBlock(e)}
-      ${skillBlock(e)}
-      ${promoBlock(promoCard(e, []))}
+      ${contextBlock()}
+      ${skillBlock()}
+      ${promoBlock(promoCard([]))}
       <div class="side-footer">
         <button class="icon-btn" type="button" disabled title="Настройки">${icons.settings}</button>
         <span class="version">${version}</span>
@@ -94,8 +89,8 @@ function chat(): string {
     </main>`;
 }
 
-export function mountShell(root: HTMLElement, e: Entitlements, info: AppInfo | null): void {
-  root.innerHTML = `<div class="app" id="layout">${sidebar(e, info)}${chat()}</div>`;
+export function mountShell(root: HTMLElement, info: AppInfo | null): void {
+  root.innerHTML = `<div class="app" id="layout">${sidebar(info)}${chat()}</div>`;
   const layout = root.querySelector<HTMLElement>("#layout")!;
   const expand = root.querySelector<HTMLButtonElement>("#expand")!;
   const setCollapsed = (on: boolean) => {
