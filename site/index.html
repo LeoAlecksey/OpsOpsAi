@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>OpsOpsAi — локальный ИИ на вашем компьютере</title>
+    <meta name="description" content="Бесплатное приложение для общения с нейросетями без облака. Модель работает на вашем компьютере, диалоги никуда не уходят." />
+    <meta property="og:title" content="OpsOpsAi — локальный ИИ на вашем компьютере" />
+    <meta property="og:description" content="Бесплатное приложение для общения с нейросетями без облака." />
+    <meta property="og:image" content="img/app.png" />
+    <link rel="icon" type="image/png" href="img/icon-64.png" />
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+    <link rel="preload" href="fonts/onest-cyrillic-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">К содержанию</a>
+
+    <header class="nav">
+      <a class="brand" href="./" aria-label="OpsOpsAi, на главную">
+        <img src="img/icon-64.png" alt="" width="28" height="28" />
+        <span>OpsOpsAi</span>
+      </a>
+      <nav aria-label="Разделы">
+        <a href="#status">Что готово</a>
+        <a href="#start">Как начать</a>
+        <a href="#support">Поддержать</a>
+        <a href="https://github.com/LeoAlecksey/OpsOpsAi">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="release" id="release">Ранний доступ, версия 0.1.0</p>
+          <h1>Ваш ИИ работает<br />на вашем компьютере</h1>
+          <p class="lead">
+            Бесплатное приложение для общения с нейросетями без облака. Модель живёт у вас,
+            поэтому переписка не уходит на чужие серверы и чат работает даже без интернета.
+          </p>
+          <div class="download" id="download">
+            <a class="btn-primary" id="dl-main" href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">Скачать OpsOpsAi</a>
+            <a class="btn-quiet" href="#all-downloads">Другие системы</a>
+          </div>
+          <p class="platforms">macOS на Apple Silicon, Windows, Linux x64 и ARM64</p>
+        </div>
+
+        <figure class="meter" aria-label="Сколько данных уходит в облако">
+          <div class="meter-row">
+            <span class="meter-label">Отправлено в облако</span>
+            <span class="meter-value" id="meter">0 байт</span>
+          </div>
+          <div class="meter-bar" aria-hidden="true"><span></span></div>
+          <figcaption>Столько ваших диалогов OpsOpsAi передаёт наружу. Всегда.</figcaption>
+        </figure>
+      </section>
+
+      <section class="shot" aria-label="Как выглядит приложение">
+        <img src="img/app.png" alt="Окно OpsOpsAi: боковая панель с историей, контекстом и скиллами, справа поле для сообщения" width="1280" height="820" loading="eager" />
+      </section>
+
+      <section class="status" id="status">
+        <h2>Честно о версии 0.1.0</h2>
+        <p class="section-lead">Это первая сборка. Она нужна, чтобы проверить установку и автообновление на разных системах.</p>
+        <div class="status-cols">
+          <div>
+            <h3>Уже работает</h3>
+            <ul class="ticks">
+              <li>Приложение для macOS, Windows и Linux</li>
+              <li>Интерфейс чата: история, контекст, скиллы</li>
+              <li>Автообновление с проверкой подписи</li>
+              <li>Журнал диагностики для сообщений об ошибках</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Появится дальше</h3>
+            <ul class="next">
+              <li>Подбор модели под ваш компьютер и загрузка в один клик</li>
+              <li>Локальный чат с ответами в реальном времени</li>
+              <li>Файлы и папки как контекст для вопросов</li>
+              <li>Скиллы и расширения от других авторов</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="principles" aria-labelledby="principles-title">
+        <h2 id="principles-title">Каким будет OpsOpsAi</h2>
+        <dl>
+          <div>
+            <dt>Без облака</dt>
+            <dd>Модель и диалоги хранятся на вашем диске. Интернет нужен только чтобы скачать модель.</dd>
+          </div>
+          <div>
+            <dt>Без настройки</dt>
+            <dd>Не нужно ставить Python, Docker или драйверы вручную: приложение само проверит компьютер и предложит подходящую модель.</dd>
+          </div>
+          <div>
+            <dt>Бесплатно</dt>
+            <dd>Приложение бесплатное целиком, без пробного периода и ограничений по времени.</dd>
+          </div>
+          <div>
+            <dt>Безопасно</dt>
+            <dd>Обновления и модели проверяются по подписи и контрольной сумме перед установкой.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="start" id="start">
+        <h2>Как начать</h2>
+        <ol class="steps">
+          <li>
+            <h3>Скачайте и установите</h3>
+            <p>Выберите файл для своей системы ниже. Дальше приложение будет обновляться само.</p>
+          </li>
+          <li>
+            <h3>Выберите модель</h3>
+            <p>OpsOpsAi покажет, какие модели потянет ваш компьютер, и сколько места они займут. <em>В следующей версии.</em></p>
+          </li>
+          <li>
+            <h3>Общайтесь</h3>
+            <p>Задавайте вопросы, прикладывайте файлы, сохраняйте удачные настройки как скиллы.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="downloads" id="all-downloads">
+        <h2>Скачать</h2>
+        <p class="section-lead" id="dl-note">Последняя версия с GitHub. Если список не загрузился, все файлы есть на <a href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">странице релиза</a>.</p>
+        <ul class="dl-list" id="dl-list">
+          <li data-os="mac"><span class="dl-os">macOS</span><span class="dl-arch">Apple Silicon (M1 и новее)</span><a href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">.dmg</a></li>
+          <li data-os="win"><span class="dl-os">Windows</span><span class="dl-arch">10 и 11, x64</span><a href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">установщик .exe</a></li>
+          <li data-os="linux"><span class="dl-os">Linux</span><span class="dl-arch">x64</span><a href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">.AppImage</a></li>
+          <li data-os="linux-arm"><span class="dl-os">Linux</span><span class="dl-arch">ARM64</span><a href="https://github.com/LeoAlecksey/OpsOpsAi/releases/latest">.AppImage</a></li>
+        </ul>
+        <p class="fine">
+          Сборки пока не подписаны Apple и Microsoft. На macOS при первом запуске откройте приложение
+          через правый клик и «Открыть», на Windows в окне SmartScreen нажмите «Подробнее» и «Выполнить в любом случае».
+        </p>
+      </section>
+
+      <section class="support" id="support">
+        <div>
+          <h2>Поддержать проект</h2>
+          <p>OpsOpsAi делает один разработчик в свободное время. Если приложение вам полезно, поддержите его развитие. Новости проекта — в Telegram-канале.</p>
+        </div>
+        <div class="support-actions">
+          <a class="btn-support" href="https://yoomoney.ru/to/4100119645604976" rel="noopener">Поддержать через ЮMoney</a>
+          <a class="btn-tg" href="https://t.me/sys_admin_expert" rel="noopener">Канал в Telegram</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer-links">
+        <span>© 2026 LeoAlecksey</span>
+        <a href="https://yoomoney.ru/to/4100119645604976" rel="noopener">Поддержать</a>
+        <a href="https://t.me/sys_admin_expert" rel="noopener">Telegram</a>
+      </p>
+      <p>Исходный код открыт для чтения, использование кода запрещено: <a href="https://github.com/LeoAlecksey/OpsOpsAi/blob/main/LICENSE">лицензия</a>.</p>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
