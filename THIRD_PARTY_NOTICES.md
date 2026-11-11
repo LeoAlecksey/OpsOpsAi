@@ -13,7 +13,7 @@ Fragments of `src-tauri/src/store.rs` and `src-tauri/src/diag.rs` are adapted fr
 OpsDeck (https://github.com/LeoAlecksey/opsdeck), written by the same copyright holder.
 No code by other OpsDeck contributors is included (checked with `git blame`).
 
-## Rust crates (src-tauri, 427 third-party packages in Cargo.lock)
+## Rust crates (src-tauri, 480 third-party packages in Cargo.lock)
 
 Checked with `cargo metadata` — every package declares a license:
 
@@ -24,17 +24,25 @@ Checked with `cargo metadata` — every package declares a license:
   keeping their notices and making the source of these files available (they are published
   on crates.io). If any of these files is ever modified, the modified files must be published
   under MPL-2.0.
+- **CDLA-Permissive-2.0**: `webpki-root-certs` (root certificate data, pulled in by the updater's
+  HTTPS client). Permissive; requires keeping the license notice.
 - Two packages are offered as "MIT OR Apache-2.0 OR LGPL-2.1-or-later"; they are used under
   MIT/Apache-2.0.
 
 Main components: Tauri 2 (MIT OR Apache-2.0), serde (MIT OR Apache-2.0),
-tauri-plugin-log (MIT OR Apache-2.0), log (MIT OR Apache-2.0), dirs (MIT OR Apache-2.0).
+tauri-plugin-log and tauri-plugin-updater (MIT OR Apache-2.0), log (MIT OR Apache-2.0),
+dirs (MIT OR Apache-2.0).
 
 ## npm packages (frontend)
 
 Shipped in the app: `@tauri-apps/api` (Apache-2.0 OR MIT).
 Build/test only (not shipped): vite, vitest, typescript, @tauri-apps/cli and their
 dependencies — MIT, Apache-2.0, ISC, BSD-3-Clause.
+
+## Website (site/)
+
+The Onest typeface (© 2021 The Onest Project Authors) is distributed with the website under the
+SIL Open Font License 1.1; the license text is in `site/fonts/OFL.txt`.
 
 ## System libraries (not bundled)
 

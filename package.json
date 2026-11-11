@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "tauri": "tauri",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2"

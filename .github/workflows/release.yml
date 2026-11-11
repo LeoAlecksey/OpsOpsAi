@@ -1,0 +1,149 @@
+# Automatic releases. A push to main whose version (package.json) has no release yet builds all
+# platforms, signs the update files, and publishes GitHub Release v<version> with latest.json for
+# the in-app updater. Raising the version: `npm run release -- X.Y.Z` (see scripts/release.mjs).
+#
+# Needs repository secrets (Settings → Secrets and variables → Actions):
+#   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+# and the matching public key in src-tauri/tauri.conf.json → plugins.updater.pubkey.
+# Without them the workflow only reports what is missing and publishes nothing.
+name: release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  plan:
+    name: plan (is there a new version?)
+    runs-on: ubuntu-24.04
+    outputs:
+      release: ${{ steps.plan.outputs.release }}
+      version: ${{ steps.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          version="$(jq -r .version package.json)"
+          conf="$(jq -r .version src-tauri/tauri.conf.json)"
+          cargo="$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -1)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "$version" != "$conf" ] || [ "$version" != "$cargo" ]; then
+            echo "::error::Версии не совпадают: package.json $version, tauri.conf.json $conf, Cargo.toml $cargo. Используйте npm run release -- X.Y.Z"
+            exit 1
+          fi
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Релиз v$version уже есть — выпускать нечего."
+            echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          missing=()
+          [ "$HAS_KEY" = "true" ] || missing+=("secret TAURI_SIGNING_PRIVATE_KEY")
+          [ -n "$(jq -r '.plugins.updater.pubkey // ""' src-tauri/tauri.conf.json)" ] || missing+=("plugins.updater.pubkey в src-tauri/tauri.conf.json")
+          [ -f "release-notes/$version.md" ] || missing+=("release-notes/$version.md")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::warning::Релиз v$version не выпущен, не хватает: ${missing[*]}"
+            echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "Выпускаю v$version"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: build ${{ matrix.name }}
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
+    permissions:
+      contents: write # the draft release
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: linux-x64
+            os: ubuntu-22.04
+          - name: linux-arm64
+            os: ubuntu-22.04-arm
+          - name: windows-x64
+            os: windows-2022
+          - name: macos-arm64
+            os: macos-latest
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: system libraries for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: toolchain from rust-toolchain.toml and the build target
+        shell: bash
+        run: |
+          rustup toolchain install --no-self-update
+          if [ -n "${{ matrix.target }}" ]; then rustup target add "${{ matrix.target }}"; fi
+          rustc --version
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: release-${{ matrix.name }}
+      - run: npm ci
+      - name: release notes
+        shell: bash
+        run: |
+          {
+            echo "RELEASE_NOTES<<__EOF__"
+            cat "release-notes/${{ needs.plan.outputs.version }}.md"
+            echo "__EOF__"
+          } >> "$GITHUB_ENV"
+      - name: build and upload to the draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          args: >-
+            --config src-tauri/tauri.release.conf.json
+            ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+          tagName: v${{ needs.plan.outputs.version }}
+          releaseName: OpsOpsAi ${{ needs.plan.outputs.version }}
+          releaseBody: ${{ env.RELEASE_NOTES }}
+          releaseCommitish: ${{ github.sha }}
+          # a draft until every platform is built; the publish job makes it visible
+          releaseDraft: true
+          # latest.json is assembled once by the publish job (parallel jobs overwrite each other's entries)
+          includeUpdaterJson: false
+
+  publish:
+    name: publish release
+    needs: [plan, build]
+    if: needs.plan.outputs.release == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: latest.json from the signed files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: scripts/latest-json.sh "v${{ needs.plan.outputs.version }}"
+      - name: publish the draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "v${{ needs.plan.outputs.version }}" --repo "$GITHUB_REPOSITORY" --draft=false --latest
