@@ -1,0 +1,36 @@
+# Facts for the model catalog: which model files exist on Hugging Face (size, sha256, license) and
+# the sha256 of the llama.cpp engine archives. Read-only; prints JSON and keeps it as an artifact.
+name: catalog
+
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: "Hugging Face repos, comma-separated (empty — the built-in list)"
+        required: false
+      engine_tag:
+        description: "llama.cpp release tag"
+        required: false
+        default: b11351
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: discover
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOS: ${{ inputs.repos }}
+          ENGINE_TAG: ${{ inputs.engine_tag }}
+        run: node scripts/catalog-discover.mjs | tee catalog-facts.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: catalog-facts
+          path: catalog-facts.json
