@@ -402,18 +402,24 @@ mod tests {
         let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
         let asked: Arc<std::sync::Mutex<Vec<(u64, u64)>>> = Default::default();
+        // the test says which attempt is running: under load a connection of the first attempt can
+        // reach the server late, and counting by order would mistake it for the second attempt
+        let second = Arc::new(AtomicBool::new(false));
         let srv = {
-            let (body, asked) = (body.clone(), asked.clone());
+            let (body, asked, second) = (body.clone(), asked.clone(), second.clone());
             std::thread::spawn(move || {
-                let mut round = 0;
-                while round < 8 {
+                let mut served_second = 0;
+                while served_second < 4 {
                     let Ok((mut s, _)) = listener.accept() else { return };
                     let Some(req) = read_request(&mut s) else { continue };
                     let (from, to) = range_of(&req).unwrap();
-                    asked.lock().unwrap().push((from, to));
-                    round += 1;
-                    // the first four answers give a quarter of their range and break off
-                    let cut = if round <= 4 { (to - from + 1) / 4 } else { to - from + 1 };
+                    let phase2 = second.load(Ordering::SeqCst);
+                    // first attempt: each answer gives a quarter of its range and breaks off
+                    let cut = if phase2 { to - from + 1 } else { (to - from + 1) / 4 };
+                    if phase2 {
+                        asked.lock().unwrap().push((from, to));
+                        served_second += 1;
+                    }
                     let slice = &body[from as usize..(from + cut) as usize];
                     let head = format!(
                         "HTTP/1.1 206 Partial Content\r\nContent-Length: {}\r\nContent-Range: bytes {from}-{to}/{}\r\nConnection: close\r\n\r\n",
@@ -437,7 +443,7 @@ mod tests {
         let got_before: u64 = st.parts.iter().map(|(.., d)| *d).sum();
         assert!(got_before > 0 && got_before < total);
 
-        asked.lock().unwrap().clear();
+        second.store(true, Ordering::SeqCst);
         tauri::async_runtime::block_on(download_parts(&client, &url, &part, total, 4, &cancel, &|_| {})).unwrap();
         srv.join().unwrap();
         let again: u64 = asked.lock().unwrap().iter().map(|(a, b)| b - a + 1).sum();

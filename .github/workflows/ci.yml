@@ -106,6 +106,15 @@ jobs:
         run: mkdir -p dist && echo '<!doctype html>' > dist/index.html
       - working-directory: src-tauri
         run: cargo test --lib --locked -- --ignored smoke --nocapture
+      - name: what the engine said (on failure)
+        if: failure()
+        shell: bash
+        run: |
+          for log in $(find "${RUNNER_TEMP:-/tmp}" /tmp -name server.log -path '*opsopsai*' 2>/dev/null); do echo "== $log"; tail -n 40 "$log"; done
+          if [ "$RUNNER_OS" = Linux ]; then
+            for f in $(find /tmp -name llama-server -path '*opsopsai*' 2>/dev/null); do echo "== $f"; file "$f"; ldd "$f" || true; done
+            ldd --version | head -1
+          fi
 
   build:
     name: build ${{ matrix.name }}

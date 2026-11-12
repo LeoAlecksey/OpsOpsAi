@@ -251,19 +251,24 @@ async fn launch(bin: &Path, model: &Path, mmproj: Option<&Path>, ctx: u32, devic
     let port = free_port()?;
     let token = new_token();
     let threads = std::thread::available_parallelism().map(|n| n.get().clamp(2, 8)).unwrap_or(4);
+    // the engine's own output goes to a file: when it fails to start, its last lines say why
+    let log_path = engine_root()?.join("server.log");
+    let log_file = fs::File::create(&log_path).map_err(err)?;
     let mut cmd = Command::new(bin);
     cmd.args(launch_args(model, mmproj, port, &token, ctx, threads, device))
         .current_dir(bin.parent().unwrap_or(Path::new(".")))
         .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null());
+        .stdout(log_file.try_clone().map_err(err)?)
+        .stderr(log_file);
     no_console(&mut cmd);
     let mut child = cmd.spawn().map_err(|e| format!("не удалось запустить движок: {e}"))?;
     let client = crate::net::loopback_client()?;
     let started = Instant::now();
     loop {
         if let Ok(Some(status)) = child.try_wait() {
-            return Err(format!("движок завершился при запуске ({status})"));
+            let tail = last_lines(&fs::read_to_string(&log_path).unwrap_or_default(), 12);
+            log::warn!("engine exited at start ({status}):\n{tail}");
+            return Err(format!("движок завершился при запуске ({status}){}", reason(&tail)));
         }
         if let Ok(r) = client.get(format!("http://127.0.0.1:{port}/health")).send().await {
             if r.status().is_success() {
@@ -276,6 +281,24 @@ async fn launch(bin: &Path, model: &Path, mmproj: Option<&Path>, ctx: u32, devic
         }
         tokio::time::sleep(Duration::from_millis(400)).await;
     }
+}
+
+/// The last `n` non-empty lines of the engine's output.
+fn last_lines(text: &str, n: usize) -> String {
+    let lines: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
+    lines[lines.len().saturating_sub(n)..].join("\n")
+}
+
+/// The line of the engine's output that says what went wrong, for the user.
+fn reason(tail: &str) -> String {
+    tail.lines()
+        .rev()
+        .find(|l| {
+            let l = l.to_ascii_lowercase();
+            l.contains("error") || l.contains("failed") || l.contains("not found") || l.contains("glibc") || l.contains("illegal")
+        })
+        .map(|l| format!(": {}", l.trim().chars().take(200).collect::<String>()))
+        .unwrap_or_default()
 }
 
 /// Local paths of a catalog model's files.
@@ -374,6 +397,14 @@ mod tests {
         let cpu = launch_args(Path::new("/m/q.gguf"), None, 1, "t", 8192, 4, Device::Cpu);
         assert!(!cpu.contains(&"--mmproj".to_string()));
         assert!(cpu.windows(2).any(|w| w[0] == "--device" && w[1] == "none"));
+    }
+
+    #[test]
+    fn the_failure_reason_comes_from_the_engine_output() {
+        let out = "load_backend: loaded CPU backend\n\nmain: error: failed to load model '/m/q.gguf'\nbye\n";
+        assert_eq!(last_lines(out, 2), "main: error: failed to load model '/m/q.gguf'\nbye");
+        assert_eq!(reason(&last_lines(out, 12)), ": main: error: failed to load model '/m/q.gguf'");
+        assert_eq!(reason("all good"), "");
     }
 
     #[test]
