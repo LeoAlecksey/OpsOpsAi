@@ -14,8 +14,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
-# Минимум для каркаса. Зависимости следующих шагов (reqwest, keyring, sha2, tar/zip для runtime)
-# добавляются вместе с кодом, которому они нужны, — не заранее.
+# Зависимости добавляются вместе с кодом, которому они нужны, — не заранее.
 [dependencies]
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
@@ -25,6 +24,20 @@ tauri-plugin-log = "2"
 dirs = "6"
 # in-app updates from GitHub Releases, signature checked against the public key in tauri.conf.json
 tauri-plugin-updater = "2"
+# local AI: HTTP to the engine and downloads; unpacking the engine (tar.gz / zip) and checking sha256
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["sync", "time", "macros", "rt"] }
+sha2 = "0.10"
+tar = "0.4"
+flate2 = "1"
+base64 = "0.22"
+# memory and disk size to judge which models this computer can run
+sysinfo = "0.37"
+# native pickers for attaching files and folders
+tauri-plugin-dialog = "2"
+zip = { version = "9", default-features = false, features = ["deflate"] }
+# session token for the local engine
+uuid = { version = "1", features = ["v4"] }
 
 [profile.dev]
 debug = "line-tables-only"

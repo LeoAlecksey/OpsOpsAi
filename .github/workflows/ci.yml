@@ -34,34 +34,73 @@ jobs:
       - run: npm audit --audit-level=high
 
   rust:
-    name: rust (clippy, tests)
-    runs-on: ubuntu-22.04
+    name: rust ${{ matrix.os }} (clippy, tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: system libraries for Tauri
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev
       - name: toolchain from rust-toolchain.toml
+        shell: bash
         run: rustup toolchain install --no-self-update && rustc --version
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
+          key: tests-${{ matrix.os }}
       # generate_context! needs the frontend folder to exist; its content does not matter here
-      - run: mkdir -p dist && echo '<!doctype html>' > dist/index.html
+      - shell: bash
+        run: mkdir -p dist && echo '<!doctype html>' > dist/index.html
       - working-directory: src-tauri
         run: cargo clippy --lib --tests --locked -- -D warnings
       - working-directory: src-tauri
         run: cargo test --lib --locked
       - name: cargo audit
+        if: runner.os == 'Linux'
         working-directory: src-tauri
         run: |
           cargo install cargo-audit --locked
           cargo audit
 
+  # the real engine and a real small model on every OS: download with the pinned sha256, unpack,
+  # start, answer text and a picture, refuse a request without the token
+  smoke:
+    name: smoke ${{ matrix.os }} (real engine and model)
+    needs: rust
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2022, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: system libraries for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev
+      - name: toolchain from rust-toolchain.toml
+        shell: bash
+        run: rustup toolchain install --no-self-update && rustc --version
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: smoke-${{ matrix.os }}
+      - shell: bash
+        run: mkdir -p dist && echo '<!doctype html>' > dist/index.html
+      - working-directory: src-tauri
+        run: cargo test --lib --locked -- --ignored smoke --nocapture
+
   build:
     name: build ${{ matrix.name }}
-    needs: [frontend, rust]
+    needs: [frontend, rust, smoke]
     strategy:
       fail-fast: false
       matrix:

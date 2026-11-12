@@ -1,13 +1,23 @@
 //! OpsOpsAi backend: app assembly, IPC commands, managed state.
 //!
-//! Каркас Phase 1: диагностика и настройки. Runtime локального ИИ, модели и
-//! чат появятся в Phase 2 за отдельными модулями.
+//! Локальный ИИ: каталог моделей и оценка железа (catalog, hw), загрузки (download), движок
+//! llama.cpp (engine), установка моделей (models), чат (chat), история (history), вложения (attach).
 
+pub mod attach;
+pub mod catalog;
+pub mod chat;
 pub mod diag;
+pub mod download;
+pub mod engine;
+pub mod history;
+pub mod hw;
+pub mod models;
+pub mod net;
 pub mod store;
 pub mod updater;
 
 use serde::Serialize;
+use tauri::Manager;
 
 #[derive(Serialize)]
 pub struct AppInfo {
@@ -43,8 +53,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(diag::log_plugin())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .manage(engine::EngineState::default())
+        .manage(models::ModelsState::default())
+        .manage(chat::ChatState::default())
         .setup(|app| {
             diag::start_watchdog(app.handle().clone());
+            engine::spawn_idle_stop(app.handle().clone());
             log::info!("OpsOpsAi {} started on {}/{}", app.package_info().version, std::env::consts::OS, std::env::consts::ARCH);
             Ok(())
         })
@@ -53,13 +68,31 @@ pub fn run() {
             donate_open,
             updater::update_check,
             updater::update_install,
+            models::models_list,
+            models::model_install,
+            models::model_cancel,
+            models::model_remove,
+            models::model_select,
+            chat::chat_send,
+            chat::chat_stop,
+            history::chats_list,
+            history::chat_load,
+            history::chat_save,
+            history::chat_delete,
+            attach::attach_pick,
             diag::log_ui,
             diag::logs_open,
             diag::logs_tail,
             diag::logs_path,
         ]))
-        .run(tauri::generate_context!())
-        .expect("error while running OpsOpsAi");
+        .build(tauri::generate_context!())
+        .expect("error while building OpsOpsAi")
+        .run(|app, event| {
+            // the engine holds gigabytes of memory: never leave it running after the window closes
+            if let tauri::RunEvent::Exit = event {
+                app.state::<engine::EngineState>().stop();
+            }
+        });
 }
 
 #[cfg(test)]

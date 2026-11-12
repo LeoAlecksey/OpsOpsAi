@@ -29,6 +29,18 @@ pub fn config_dir() -> Result<PathBuf, String> {
     Ok(dir)
 }
 
+/// The app's data folder (engine, models, chats), created on first use. Models are big, so this
+/// is the local (non-roaming) data folder on Windows.
+pub fn data_dir() -> Result<PathBuf, String> {
+    #[cfg(test)]
+    let root = std::env::temp_dir().join(format!("opsopsai-test-data-{}", std::process::id()));
+    #[cfg(not(test))]
+    let root = dirs::data_local_dir().ok_or("не найдена папка данных пользователя")?;
+    let dir = root.join(APP_DIR);
+    fs::create_dir_all(&dir).map_err(err)?;
+    Ok(dir)
+}
+
 /// Previous copy of a config file: save_json renames the old file here before putting the new one in
 /// place, so an interrupted write can never leave the app without its settings.
 fn sibling(path: &Path, suffix: &str) -> PathBuf {
@@ -40,7 +52,7 @@ pub fn load_json<T: DeserializeOwned + Default>(name: &str) -> Result<T, String>
     load_json_in(&config_dir()?, name)
 }
 
-fn load_json_in<T: DeserializeOwned + Default>(dir: &Path, name: &str) -> Result<T, String> {
+pub fn load_json_in<T: DeserializeOwned + Default>(dir: &Path, name: &str) -> Result<T, String> {
     let path = dir.join(name);
     let bak = sibling(&path, "bak");
     let parsed = |p: &Path| -> Option<Result<T, String>> {
@@ -76,7 +88,7 @@ pub fn save_json<T: Serialize>(name: &str, value: &T) -> Result<(), String> {
     write_json_in(&config_dir()?, name, &serde_json::to_string_pretty(value).map_err(err)?)
 }
 
-fn write_json_in(dir: &Path, name: &str, data: &str) -> Result<(), String> {
+pub fn write_json_in(dir: &Path, name: &str, data: &str) -> Result<(), String> {
     let path = dir.join(name);
     let tmp = sibling(&path, "tmp");
     {

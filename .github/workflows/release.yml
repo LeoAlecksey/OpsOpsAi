@@ -1,5 +1,5 @@
-# Automatic releases. A push to main whose version (package.json) has no release yet builds all
-# platforms, signs the update files, and publishes GitHub Release v<version> with latest.json for
+# Automatic releases. After ci passes on main (tests on Linux/Windows/macOS, the real-engine smoke
+# test, test builds), a version (package.json) that has no release yet builds all platforms, signs the update files, and publishes GitHub Release v<version> with latest.json for
 # the in-app updater. Raising the version: `npm run release -- X.Y.Z` (see scripts/release.mjs).
 #
 # Needs repository secrets (Settings → Secrets and variables → Actions):
@@ -9,7 +9,9 @@
 name: release
 
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -26,12 +28,16 @@ env:
 jobs:
   plan:
     name: plan (is there a new version?)
+    # only after a green ci run of a push to main (or a manual start)
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-24.04
     outputs:
       release: ${{ steps.plan.outputs.release }}
       version: ${{ steps.plan.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - id: plan
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +89,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: system libraries for Tauri
         if: runner.os == 'Linux'
         run: |
@@ -124,7 +132,7 @@ jobs:
           tagName: v${{ needs.plan.outputs.version }}
           releaseName: OpsOpsAi ${{ needs.plan.outputs.version }}
           releaseBody: ${{ env.RELEASE_NOTES }}
-          releaseCommitish: ${{ github.sha }}
+          releaseCommitish: ${{ github.event.workflow_run.head_sha || github.sha }}
           # a draft until every platform is built; the publish job makes it visible
           releaseDraft: true
           # latest.json is assembled once by the publish job (parallel jobs overwrite each other's entries)
@@ -139,6 +147,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: latest.json from the signed files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

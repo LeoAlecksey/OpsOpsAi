@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "engine": {
+    "tag": "b11351",
+    "assets": {
+      "llama-b11351-bin-macos-arm64.tar.gz": {
+        "size": 11830047,
+        "sha256": "6b5f2443b76b2bf55bce78fca3c72b26cca2044704554d072d00da0f41ad6377"
+      },
+      "llama-b11351-bin-ubuntu-arm64.tar.gz": {
+        "size": 13591710,
+        "sha256": "4ada59be03d9c76e7ab4b1a63cde403cf9d1cdedd13d424cb53a250a55ed636a"
+      },
+      "llama-b11351-bin-ubuntu-vulkan-arm64.tar.gz": {
+        "size": 24752348,
+        "sha256": "806cea3e6f5084eaa77378c00aaa67e4df5e6e06d23513f0e96baffacd8e917c"
+      },
+      "llama-b11351-bin-ubuntu-vulkan-x64.tar.gz": {
+        "size": 31494330,
+        "sha256": "fca7bde3fb7983bb7d9e79b0027370503a1d9f6985193b53bc11247bbdad68de"
+      },
+      "llama-b11351-bin-ubuntu-x64.tar.gz": {
+        "size": 17550308,
+        "sha256": "c800a3402548d57f408adcebe4e53b939141e34e09b7e4701c785435572d1fee"
+      },
+      "llama-b11351-bin-win-cpu-x64.zip": {
+        "size": 19276794,
+        "sha256": "ced25d91ed2c0981420dcfc9e7823892156c13b5c8dc9f26d334d8e3e4c33a09"
+      },
+      "llama-b11351-bin-win-vulkan-x64.zip": {
+        "size": 33210463,
+        "sha256": "72a94b243aabc5715b177c1aacaf7729809d319ab3f88a8d6bdade41bb2f0440"
+      }
+    }
+  },
+  "models": [
+    {
+      "id": "qwen3.5-0.8b",
+      "title": "Qwen3.5 0.8B",
+      "family": "Qwen3.5",
+      "params_b": 0.8,
+      "active_b": 0.8,
+      "ram_gb": 4,
+      "license": "Apache-2.0",
+      "description": "Самая лёгкая: мгновенные ответы на слабом железе, для простых вопросов и коротких текстов.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.5-0.8B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf",
+        "size": 532517120,
+        "sha256": "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517"
+      },
+      "mmproj": {
+        "name": "qwen3.5-0.8b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 204987232,
+        "sha256": "56e4c6cfe73b0c82e3e82bc518d7591997e61d81f723fc41a586f4fa69ea2453"
+      }
+    },
+    {
+      "id": "qwen3.5-2b",
+      "title": "Qwen3.5 2B",
+      "family": "Qwen3.5",
+      "params_b": 2,
+      "active_b": 2,
+      "ram_gb": 6,
+      "license": "Apache-2.0",
+      "description": "Быстрая и компактная: подходит для ноутбуков с 8 ГБ памяти.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.5-2B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf",
+        "size": 1280835840,
+        "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223"
+      },
+      "mmproj": {
+        "name": "qwen3.5-2b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 668227264,
+        "sha256": "7035e9cb8d7c6a9681d07eef9a364783e86ea4cd73faab2eabb4f43a101830c7"
+      }
+    },
+    {
+      "id": "qwen3.5-4b",
+      "title": "Qwen3.5 4B",
+      "family": "Qwen3.5",
+      "params_b": 4,
+      "active_b": 4,
+      "ram_gb": 8,
+      "license": "Apache-2.0",
+      "description": "Хороший баланс скорости и качества для повседневных задач.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.5-4B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+        "size": 2740937888,
+        "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+      },
+      "mmproj": {
+        "name": "qwen3.5-4b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 672423616,
+        "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864"
+      }
+    },
+    {
+      "id": "gemma-3-4b",
+      "title": "Gemma 3 4B",
+      "family": "Gemma",
+      "params_b": 4,
+      "active_b": 4,
+      "ram_gb": 8,
+      "license": "Gemma Terms of Use",
+      "description": "Модель Google: хорошо пишет тексты, альтернатива Qwen того же размера.",
+      "vision": true,
+      "file": {
+        "name": "gemma-3-4b-it-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf",
+        "size": 2489894016,
+        "sha256": "04a43a22e8d2003deda5acc262f68ec1005fa76c735a9962a8c77042a74a7d19"
+      },
+      "mmproj": {
+        "name": "gemma-3-4b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 851251328,
+        "sha256": "731199e016ec5f227b8293fef839899472e0ee4c51adf5f9e5cb66f6558fa142"
+      }
+    },
+    {
+      "id": "qwen3.5-9b",
+      "title": "Qwen3.5 9B",
+      "family": "Qwen3.5",
+      "params_b": 9,
+      "active_b": 9,
+      "ram_gb": 16,
+      "license": "Apache-2.0",
+      "description": "Заметно умнее: рассуждения, работа с документами, код.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.5-9B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/Qwen3.5-9B-Q4_K_M.gguf",
+        "size": 5680522464,
+        "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8"
+      },
+      "mmproj": {
+        "name": "qwen3.5-9b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 918166080,
+        "sha256": "f70dc3509053962b0d0d3ee8a7eacebf5d60aa560cad78254ae8698516ae029f"
+      }
+    },
+    {
+      "id": "gemma-3-12b",
+      "title": "Gemma 3 12B",
+      "family": "Gemma",
+      "params_b": 12,
+      "active_b": 12,
+      "ram_gb": 16,
+      "license": "Gemma Terms of Use",
+      "description": "Крупнее и грамотнее в текстах; на процессоре отвечает медленнее.",
+      "vision": true,
+      "file": {
+        "name": "gemma-3-12b-it-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf",
+        "size": 7300778336,
+        "sha256": "15b8fd9d8672cd4240c178c217ca781409291f34e353d2e913b29c7602ceb3ff"
+      },
+      "mmproj": {
+        "name": "gemma-3-12b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-12b-it-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 854200448,
+        "sha256": "5de4ccfc379faa4cbf608dd365c028aa41f9774cdb1191d148d88910d1014f71"
+      }
+    },
+    {
+      "id": "qwen3.8-27b",
+      "title": "Qwen3.8 27B",
+      "family": "Qwen3.8",
+      "params_b": 27,
+      "active_b": 27,
+      "ram_gb": 24,
+      "license": "Apache-2.0",
+      "description": "Сильная плотная модель для сложных задач; лучше с видеокартой.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.8-27B-UD-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-UD-Q4_K_M.gguf",
+        "size": 16564259744,
+        "sha256": "1bce504dfecd84153666928a41d8a66706f0158d3a317bc5196b72819d7dc529"
+      },
+      "mmproj": {
+        "name": "qwen3.8-27b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 927607488,
+        "sha256": "cbb841a9ee0636b2ec172f5bb8df2ea8dfeb01e90fe7c6126581d662a0b4e43e"
+      }
+    },
+    {
+      "id": "gemma-3-27b",
+      "title": "Gemma 3 27B",
+      "family": "Gemma",
+      "params_b": 27,
+      "active_b": 27,
+      "ram_gb": 24,
+      "license": "Gemma Terms of Use",
+      "description": "Самая крупная Gemma: качественные тексты, нужна мощная машина.",
+      "vision": true,
+      "file": {
+        "name": "gemma-3-27b-it-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-27b-it-GGUF/resolve/main/gemma-3-27b-it-Q4_K_M.gguf",
+        "size": 16546688736,
+        "sha256": "f1b699659942c777bd3ec0bcb527d6ebf34ae14ca76e3af103d58d0c9cbdadee"
+      },
+      "mmproj": {
+        "name": "gemma-3-27b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/gemma-3-27b-it-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 857739392,
+        "sha256": "debe2545831a2566dcec81992b9aa8fa8381c5a0a3588c0b59a41cc9c610cfe7"
+      }
+    },
+    {
+      "id": "qwen3.6-35b-a3b",
+      "title": "Qwen3.6 35B-A3B (MoE)",
+      "family": "Qwen3.6",
+      "params_b": 35,
+      "active_b": 3,
+      "ram_gb": 32,
+      "license": "Apache-2.0",
+      "description": "Большая MoE-модель: знает много, а отвечает почти так же быстро, как маленькая. Нужно много памяти.",
+      "vision": true,
+      "file": {
+        "name": "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+        "size": 22134528992,
+        "sha256": "ac0e2c1189e055faa36eff361580e79c5bd6f8e76bffb4ce547f167d53e31a61"
+      },
+      "mmproj": {
+        "name": "qwen3.6-35b-a3b-mmproj-F16.gguf",
+        "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/mmproj-F16.gguf",
+        "size": 899283680,
+        "sha256": "8971ee4f331ff0a4c609374f32984b3d4e6dc086c0aa35f1d637fad1829e887f"
+      }
+    }
+  ]
+}
