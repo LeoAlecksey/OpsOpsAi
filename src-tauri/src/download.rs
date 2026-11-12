@@ -165,10 +165,6 @@ async fn download_parts(
                 safe.store(at - from, Ordering::Relaxed);
             };
             loop {
-                if cancel.load(Ordering::Relaxed) {
-                    publish(&mut f, at);
-                    return Err("загрузка отменена".into());
-                }
                 let requested_from = at;
                 let response = client
                     .get(&url)
@@ -203,10 +199,6 @@ async fn download_parts(
 
                 let mut unsynced = 0u64;
                 let failure = loop {
-                    if cancel.load(Ordering::Relaxed) {
-                        publish(&mut f, at);
-                        return Err("загрузка отменена".into());
-                    }
                     match resp.chunk().await {
                         Ok(Some(chunk)) => {
                             if at + chunk.len() as u64 > response_to + 1 {
