@@ -1,31 +1,20 @@
-// The app frame: sidebar (history, context, skill, promo slot) and the chat area.
-// Phase 1 is the frame only: actions that need a model are shown disabled and say why.
+// The app frame: sidebar (history, skill, promo slot) and the chat area. The chat itself lives in
+// chat-ui.ts, the models window in models-ui.ts; this file draws the frame and wires settings.
 
 import { icons } from "./icons";
 import type { AppInfo } from "./ipc";
 import { donateOpen, logsOpen, logUi, updateCheck, updateInstall, type UpdateInfo } from "./ipc";
-import { aboutLine, escapeHtml, modelStatus, promoCard, updateProgressText, updateStatusText, type PromoCard } from "./view";
-
-function contextBlock(): string {
-  return `
-    <section class="side-block">
-      <div class="side-label">${icons.layers}<span>Контекст</span></div>
-      <button class="picker" type="button" disabled title="Появится вместе с локальной моделью">
-        <span>Без контекста</span>${icons.chevron}
-      </button>
-      <button class="picker picker-ghost" type="button" disabled>
-        ${icons.folder}<span>Папка или проект</span>
-      </button>
-    </section>`;
-}
+import { aboutLine, escapeHtml, promoCard, updateProgressText, updateStatusText, type PromoCard } from "./view";
+import { SKILLS } from "./chatlogic";
+import { mountChat } from "./chat-ui";
+import { mountModels } from "./models-ui";
 
 function skillBlock(): string {
+  const options = SKILLS.map((k) => `<option value="${k.id}">${escapeHtml(k.title)}</option>`).join("");
   return `
     <section class="side-block">
-      <div class="side-label">${icons.spark}<span>Скилл</span></div>
-      <button class="picker" type="button" disabled title="Появится вместе с локальной моделью">
-        <span>Обычный чат</span>${icons.chevron}
-      </button>
+      <label class="side-label" for="skill">${icons.spark}<span>Скилл</span></label>
+      <select class="picker" id="skill" title="Инструкции для модели в этом чате">${options}</select>
     </section>`;
 }
 
@@ -45,12 +34,11 @@ function sidebar(info: AppInfo | null): string {
         ${icons.logo}<span class="brand-name">OpsOpsAi</span>
         <button class="icon-btn" id="collapse" type="button" title="Скрыть панель">${icons.panel}</button>
       </div>
-      <button class="new-chat" type="button" disabled title="Появится вместе с локальной моделью">${icons.plus}<span>Новый чат</span></button>
-      <label class="search">${icons.search}<input type="search" placeholder="Поиск по чатам" disabled /></label>
-      <div class="history">
+      <button class="new-chat" id="new-chat" type="button">${icons.plus}<span>Новый чат</span></button>
+      <label class="search">${icons.search}<input type="search" id="search" placeholder="Поиск по чатам" /></label>
+      <div class="history" id="history">
         <div class="history-empty">Чатов пока нет</div>
       </div>
-      ${contextBlock()}
       ${skillBlock()}
       ${promoBlock(promoCard([]))}
       <button class="update-pill" id="update-pill" type="button" hidden>${icons.update}<span></span></button>
@@ -67,29 +55,45 @@ function chat(): string {
     <main class="chat">
       <header class="topbar">
         <button class="icon-btn" id="expand" type="button" title="Показать панель" hidden>${icons.panel}</button>
-        <button class="model-picker" type="button" disabled title="Модели появятся в следующей версии">
-          ${icons.chip}<span class="model-name">Модель не выбрана</span>${icons.chevron}
+        <button class="model-picker" id="model-picker" type="button" title="Выбрать или установить модель">
+          ${icons.chip}<span class="model-name" id="model-name">Модель не выбрана</span>${icons.chevron}
         </button>
-        <span class="status-dot" aria-hidden="true"></span>
-        <span class="status">${modelStatus(false)}</span>
+        <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+        <span class="status" id="status">Проверяю модели…</span>
       </header>
-      <section class="empty">
+      <section class="messages" id="messages" aria-live="polite"></section>
+      <section class="empty" id="empty">
         <h1>Чем помочь?</h1>
-        <p>Локальный ИИ работает на этом компьютере. Чат станет доступен после установки модели.</p>
+        <p id="empty-text">Локальный ИИ работает на этом компьютере. Ничего не уходит в интернет.</p>
+        <button class="btn btn-accent" id="empty-models" type="button" hidden>${icons.chip}<span>Выбрать и установить модель</span></button>
       </section>
       <form class="composer" id="composer">
+        <div class="attachments" id="attachments" hidden></div>
         <div class="composer-box">
-          <textarea id="prompt" rows="1" placeholder="Спросите что-нибудь…" disabled></textarea>
+          <textarea id="prompt" rows="1" placeholder="Спросите что-нибудь…"></textarea>
           <div class="composer-row">
-            <button class="icon-btn" type="button" disabled title="Прикрепить файл">${icons.paperclip}</button>
-            <button class="icon-btn" type="button" disabled title="Прикрепить папку">${icons.folder}</button>
+            <button class="icon-btn" id="attach-file" type="button" title="Прикрепить файл или картинку">${icons.paperclip}</button>
+            <button class="icon-btn" id="attach-folder" type="button" title="Прикрепить папку">${icons.folder}</button>
             <span class="spacer"></span>
-            <button class="send" type="submit" disabled title="Отправить">${icons.send}</button>
+            <button class="stop" id="stop" type="button" title="Остановить ответ" hidden>${icons.stop}</button>
+            <button class="send" id="send" type="submit" title="Отправить (Enter)" disabled>${icons.send}</button>
           </div>
         </div>
-        <div class="hint">Ответы генерируются локально и не покидают компьютер.</div>
+        <div class="hint">Ответы генерируются локально и не покидают компьютер. Enter — отправить, Shift+Enter — новая строка.</div>
       </form>
     </main>`;
+}
+
+function modelsDialog(): string {
+  return `
+    <dialog class="settings models" id="models" aria-labelledby="models-title">
+      <header class="settings-head">
+        <h2 id="models-title">Модели</h2>
+        <button class="icon-btn" id="close-models" type="button" title="Закрыть">${icons.close}</button>
+      </header>
+      <p class="models-hw muted" id="models-hw"></p>
+      <div class="models-body" id="models-body"><p class="muted">Загружаю список…</p></div>
+    </dialog>`;
 }
 
 function settingsDialog(info: AppInfo | null): string {
@@ -127,7 +131,7 @@ function action(run: () => Promise<void>, what: string): () => void {
 }
 
 export function mountShell(root: HTMLElement, info: AppInfo | null): void {
-  root.innerHTML = `<div class="app" id="layout">${sidebar(info)}${chat()}</div>${settingsDialog(info)}`;
+  root.innerHTML = `<div class="app" id="layout">${sidebar(info)}${chat()}</div>${settingsDialog(info)}${modelsDialog()}`;
   const layout = root.querySelector<HTMLElement>("#layout")!;
   const expand = root.querySelector<HTMLButtonElement>("#expand")!;
   const setCollapsed = (on: boolean) => {
@@ -136,7 +140,6 @@ export function mountShell(root: HTMLElement, info: AppInfo | null): void {
   };
   root.querySelector("#collapse")!.addEventListener("click", () => setCollapsed(true));
   expand.addEventListener("click", () => setCollapsed(false));
-  root.querySelector("#composer")!.addEventListener("submit", (ev) => ev.preventDefault());
 
   const settings = root.querySelector<HTMLDialogElement>("#settings")!;
   root.querySelector("#open-settings")!.addEventListener("click", () => settings.showModal());
@@ -151,6 +154,8 @@ export function mountShell(root: HTMLElement, info: AppInfo | null): void {
   root.querySelector("#open-logs")!.addEventListener("click", action(logsOpen, "logs"));
 
   mountUpdates(root, settings, info !== null);
+  const models = mountModels(root);
+  mountChat(root, models);
 }
 
 /** Update check and install: the settings section plus a small pill in the sidebar when one is available. */

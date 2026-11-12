@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aboutLine, escapeHtml, modelStatus, promoCard, PROMO_PLACEHOLDER, updateProgressText, updateStatusText } from "../../src/view";
+import { aboutLine, escapeHtml, promoCard, PROMO_PLACEHOLDER, updateProgressText, updateStatusText } from "../../src/view";
 
 describe("promo slot", () => {
   it("shows the placeholder until cards are loaded", () => {
@@ -15,13 +15,6 @@ describe("promo slot", () => {
 describe("escapeHtml", () => {
   it("neutralises markup in card texts", () => {
     expect(escapeHtml(`<img src=x onerror="a()">&'`)).toBe("&lt;img src=x onerror=&quot;a()&quot;&gt;&amp;&#39;");
-  });
-});
-
-describe("model status", () => {
-  it("says whether a model is installed", () => {
-    expect(modelStatus(false)).toBe("Модель не установлена");
-    expect(modelStatus(true)).toBe("Модель готова");
   });
 });
 

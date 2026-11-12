@@ -20,7 +20,7 @@ env:
 
 jobs:
   frontend:
-    name: frontend (types, unit tests, audit)
+    name: frontend (types, unit and UI tests, audit)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +32,15 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm test
       - run: npm audit --audit-level=high
+      # the real interface in Chromium on a fake backend (tests/ui/mock.js)
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
 
   rust:
     name: rust ${{ matrix.os }} (clippy, tests)

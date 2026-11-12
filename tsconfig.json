@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "playwright.config.ts"]
 }

@@ -51,8 +51,3 @@ export function updateStatusText(info: { current: string; available: boolean; ve
   if (!info) return "Обновления проверяются только в установленном приложении";
   return info.available && info.version ? `Доступна версия ${info.version}` : `Установлена последняя версия (${info.current})`;
 }
-
-/** Status line under the model picker. */
-export function modelStatus(installed: boolean): string {
-  return installed ? "Модель готова" : "Модель не установлена";
-}
