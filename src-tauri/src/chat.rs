@@ -42,7 +42,15 @@ pub fn request_body(messages: &[Msg], temperature: f32) -> Value {
             }
         })
         .collect();
-    json!({ "messages": msgs, "stream": true, "temperature": temperature, "cache_prompt": true })
+    json!({
+        "messages": msgs,
+        "stream": true,
+        "temperature": temperature,
+        "repeat_penalty": 1.1,
+        "repeat_last_n": 128,
+        "max_tokens": 4096,
+        "cache_prompt": true
+    })
 }
 
 /// Text pieces of an OpenAI-style SSE stream; `buf` keeps an unfinished line between chunks.

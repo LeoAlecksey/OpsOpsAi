@@ -72,9 +72,6 @@ export function mountChat(root: HTMLElement, models: ModelsApi): void {
     else if (busy) return;
     else if (m) setStatus(m.vision ? "Готова, понимает картинки" : "Готова", "ok");
     else setStatus("Установите модель, чтобы начать", "warn");
-    const empty = chat.messages.length === 0;
-    emptyEl.hidden = !empty;
-    messagesEl.hidden = empty;
     emptyModels.hidden = !!m || !inTauri();
     emptyText.textContent = m
       ? "Локальный ИИ работает на этом компьютере. Ничего не уходит в интернет."
@@ -187,6 +184,9 @@ export function mountChat(root: HTMLElement, models: ModelsApi): void {
   };
 
   const renderMessages = () => {
+    const hasMessages = chat.messages.length > 0;
+    emptyEl.hidden = hasMessages;
+    messagesEl.hidden = !hasMessages;
     messagesEl.innerHTML = `<div class="messages-inner">${chat.messages.map(messageHtml).join("")}</div>`;
     messagesEl.scrollTop = messagesEl.scrollHeight;
   };

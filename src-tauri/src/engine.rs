@@ -202,13 +202,10 @@ pub enum Device {
     Cpu,
 }
 
-/// Context window, tokens: longer chats and attachments need more, but take memory.
-pub fn ctx_size(ram_total: u64) -> u32 {
-    if ram_total >= 15 * (1 << 30) {
-        16384
-    } else {
-        8192
-    }
+/// Use the full context advertised by the model metadata (llama.cpp: `--ctx-size 0`).
+/// A smaller fixed window caused long conversations and attachments to fail unnecessarily.
+pub fn ctx_size(_ram_total: u64) -> u32 {
+    0
 }
 
 /// Arguments for llama-server (without the program). Pure, so it is tested on any OS.
@@ -534,8 +531,8 @@ mod tests {
     }
 
     #[test]
-    fn more_memory_gets_a_longer_context() {
-        assert_eq!(ctx_size(8 << 30), 8192);
-        assert_eq!(ctx_size(16 << 30), 16384);
+    fn use_the_context_size_advertised_by_the_model() {
+        assert_eq!(ctx_size(8 << 30), 0);
+        assert_eq!(ctx_size(16 << 30), 0);
     }
 }

@@ -78,6 +78,14 @@ fn range_total(status: u16, content_range: Option<&str>) -> Option<u64> {
     content_range?.rsplit('/').next()?.trim().parse().ok().filter(|n| *n > 0)
 }
 
+/// Bounds and full size from a server's `Content-Range` response header.
+fn parse_content_range(value: &str) -> Option<(u64, u64, u64)> {
+    let value = value.strip_prefix("bytes ")?;
+    let (bounds, total) = value.split_once('/')?;
+    let (from, to) = bounds.split_once('-')?;
+    Some((from.parse().ok()?, to.parse().ok()?, total.parse().ok()?))
+}
+
 /// sha256 of a written file: it cannot be computed on the fly, the parts arrive out of order.
 pub fn sha_of(path: &Path, cancel: &AtomicBool, on_progress: &dyn Fn(u64)) -> Result<String, String> {
     use std::io::Read;
@@ -146,19 +154,10 @@ async fn download_parts(
         let (client, url, path) = (client.clone(), url.to_string(), part.to_path_buf());
         let (live, safe) = (live[i].clone(), safe[i].clone());
         set.spawn(async move {
-            let start = from + done_before;
-            let mut resp = client
-                .get(&url)
-                .header(reqwest::header::RANGE, format!("bytes={start}-{to}"))
-                .send()
-                .await
-                .map_err(|e| format!("загрузка не удалась: {e}"))?;
-            if !resp.status().is_success() {
-                return Err(format!("сервер ответил {}", resp.status()));
-            }
+            const MAX_RETRIES: u8 = 4;
+            let mut at = from + done_before;
+            let mut failures = 0u8;
             let mut f = fs::OpenOptions::new().write(true).open(&path).map_err(err)?;
-            let mut at = start;
-            let mut unsynced = 0u64;
             // only what is on disk goes to the resume state: after a hard break we would otherwise
             // count a tail that was still in the cache
             let publish = |f: &mut fs::File, at: u64| {
@@ -166,28 +165,82 @@ async fn download_parts(
                 safe.store(at - from, Ordering::Relaxed);
             };
             loop {
-                let chunk = match resp.chunk().await {
-                    Ok(Some(c)) => c,
-                    Ok(None) => break,
+                if cancel.load(Ordering::Relaxed) {
+                    publish(&mut f, at);
+                    return Err("загрузка отменена".into());
+                }
+                let requested_from = at;
+                let response = client
+                    .get(&url)
+                    .header(reqwest::header::ACCEPT_ENCODING, "identity")
+                    .header(reqwest::header::RANGE, format!("bytes={requested_from}-{to}"))
+                    .send()
+                    .await;
+                let mut resp = match response {
+                    Ok(resp) if resp.status() == reqwest::StatusCode::PARTIAL_CONTENT => resp,
+                    Ok(resp) => return Err(format!("сервер не поддержал диапазон загрузки: {}", resp.status())),
                     Err(e) => {
-                        publish(&mut f, at);
-                        return Err(format!("загрузка прервалась: {e}"));
+                        failures += 1;
+                        if failures > MAX_RETRIES {
+                            publish(&mut f, at);
+                            return Err(format!("загрузка не удалась после повторов: {e}"));
+                        }
+                        tokio::time::sleep(Duration::from_millis(250 * (1u64 << (failures - 1)))).await;
+                        continue;
                     }
                 };
-                write_at(&mut f, at, &chunk)?;
-                at += chunk.len() as u64;
-                unsynced += chunk.len() as u64;
-                live.store(at - from, Ordering::Relaxed);
-                if unsynced >= 2 * 1024 * 1024 {
-                    publish(&mut f, at);
-                    unsynced = 0;
+                let bounds = resp
+                    .headers()
+                    .get(reqwest::header::CONTENT_RANGE)
+                    .and_then(|v| v.to_str().ok())
+                    .and_then(parse_content_range);
+                let Some((response_from, response_to, response_total)) = bounds else {
+                    return Err("сервер прислал неверный Content-Range при загрузке".into());
+                };
+                if response_from != requested_from || response_to > to || response_total != total || response_to < response_from {
+                    return Err("сервер прислал диапазон, отличный от запрошенного".into());
+                }
+
+                let mut unsynced = 0u64;
+                let failure = loop {
+                    if cancel.load(Ordering::Relaxed) {
+                        publish(&mut f, at);
+                        return Err("загрузка отменена".into());
+                    }
+                    match resp.chunk().await {
+                        Ok(Some(chunk)) => {
+                            if at + chunk.len() as u64 > response_to + 1 {
+                                return Err("сервер прислал больше байт, чем указано в Content-Range".into());
+                            }
+                            write_at(&mut f, at, &chunk)?;
+                            at += chunk.len() as u64;
+                            unsynced += chunk.len() as u64;
+                            live.store(at - from, Ordering::Relaxed);
+                            if unsynced >= 2 * 1024 * 1024 {
+                                publish(&mut f, at);
+                                unsynced = 0;
+                            }
+                        }
+                        Ok(None) if at == response_to + 1 => break None,
+                        Ok(None) => break Some("соединение закрылось раньше времени".to_string()),
+                        Err(e) => break Some(format!("загрузка прервалась: {e}")),
+                    }
+                };
+                publish(&mut f, at);
+                if at > to {
+                    return Ok(());
+                }
+                if at > requested_from {
+                    failures = 0;
+                }
+                if let Some(e) = failure {
+                    failures += 1;
+                    if failures > MAX_RETRIES {
+                        return Err(format!("{e}; повторите установку модели"));
+                    }
+                    tokio::time::sleep(Duration::from_millis(250 * (1u64 << (failures - 1)))).await;
                 }
             }
-            publish(&mut f, at);
-            if at <= to {
-                return Err("соединение закрылось раньше времени".into());
-            }
-            Ok(())
         });
     }
     let mut saved = Instant::now();
