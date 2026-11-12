@@ -11,6 +11,7 @@ use serde_json::json;
 use std::{
     collections::HashMap,
     fs,
+    path::PathBuf,
     sync::{atomic::AtomicBool, Arc, Mutex},
 };
 use tauri::{AppHandle, Emitter, Manager};
@@ -135,15 +136,36 @@ pub fn model_install(app: AppHandle, id: String) -> Result<(), String> {
         let result: Result<(), String> = async {
             let data = store::data_dir()?;
             let hw = hw::detect(&data);
-            engine::install(hw.gpu, &cancel, &progress("engine")).await?;
             let (file, proj) = engine::model_paths(m)?;
-            if !file.exists() {
-                download::download(&m.file.url, &file, &m.file.sha256, &cancel, &progress("model")).await?;
-            }
-            if let (Some(p), Some(path)) = (&m.mmproj, proj) {
-                if !path.exists() {
-                    download::download(&p.url, &path, &p.sha256, &cancel, &progress("vision")).await?;
+            // the engine, the model and its vision projector come at the same time, each in
+            // several connections: the slowest file sets the pace, not the sum of all three.
+            // Separate tasks, so one file's sha256 pass does not hold up the others' bytes.
+            let task = |stage: &'static str, job: Option<(&'static str, PathBuf, &'static str)>| {
+                let (cancel, on) = (cancel.clone(), progress(stage));
+                tauri::async_runtime::spawn(async move {
+                    match job {
+                        Some((url, dest, sha)) if !dest.exists() => download::download(url, &dest, sha, &cancel, &on).await,
+                        _ => Ok(()),
+                    }
+                })
+            };
+            let model = task("model", Some((m.file.url.as_str(), file, m.file.sha256.as_str())));
+            let vision = task("vision", m.mmproj.as_ref().zip(proj).map(|(p, path)| (p.url.as_str(), path, p.sha256.as_str())));
+            let engine = {
+                let (cancel, on, gpu) = (cancel.clone(), progress("engine"), hw.gpu);
+                tauri::async_runtime::spawn(async move { engine::install(gpu, &cancel, &on).await.map(|_| ()) })
+            };
+            let mut first_error = None;
+            for (name, handle) in [("engine", engine), ("model", model), ("vision", vision)] {
+                let r = handle.await.map_err(|e| format!("{name}: {e}")).and_then(|r| r);
+                if let Err(e) = r {
+                    // one file failed: stop the others (their .part stays for a resume)
+                    cancel.store(true, std::sync::atomic::Ordering::Relaxed);
+                    first_error.get_or_insert(e);
                 }
+            }
+            if let Some(e) = first_error {
+                return Err(e);
             }
             // the first installed model becomes the one chats use
             let mut s = engine::settings();

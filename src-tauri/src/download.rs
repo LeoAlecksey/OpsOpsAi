@@ -17,9 +17,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-/// How many connections to open and from which file size it makes sense at all.
-const DL_PARTS: u64 = 4;
-const DL_MIN_SPLIT: u64 = 64 * 1024 * 1024;
+/// How many connections to open per file (like aria2c -x8) and from which size it makes sense at all.
+/// Hugging Face's CDN caps a single connection well below a typical home line.
+const DL_PARTS: u64 = 8;
+const DL_MIN_SPLIT: u64 = 16 * 1024 * 1024;
 
 /// Progress of one file: bytes done of total; `check` — the sha256 pass after the download.
 pub trait Progress: Fn(u64, u64, bool) + Send + Sync {}

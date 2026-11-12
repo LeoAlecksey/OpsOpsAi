@@ -65,22 +65,35 @@ export function formatBytes(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 2 ** 20))} МБ`;
 }
 
-const STAGE: Record<ModelProgress["stage"], string> = { engine: "Движок", model: "Модель", vision: "Модуль зрения" };
+/** The latest progress of each file of one installation, keyed by stage. */
+export type InstallProgress = Partial<Record<ModelProgress["stage"], ModelProgress>>;
 
-/** One line under a model while it installs. */
-export function installProgressText(p: ModelProgress): string {
-  const pct = p.total ? Math.min(100, Math.floor((p.done / p.total) * 100)) : 0;
-  if (p.check) return `${STAGE[p.stage]}: проверка подлинности ${pct}%`;
-  if (!p.total) return `${STAGE[p.stage]}: ${formatBytes(p.done)}`;
-  return `${STAGE[p.stage]}: ${formatBytes(p.done)} из ${formatBytes(p.total)} (${pct}%)`;
+/** Adds an event to an installation's progress: the files download at the same time. */
+export function withProgress(all: InstallProgress | undefined, p: ModelProgress): InstallProgress {
+  return { ...all, [p.stage]: p };
 }
 
-/** Overall share of an installation, 0..1, across its stages (engine is small, model is the bulk). */
-export function installFraction(p: ModelProgress): number {
-  const part = p.total ? Math.min(1, p.done / p.total) : 0;
-  const local = p.check ? 0.9 + part * 0.1 : part * 0.9;
-  const [from, span] = p.stage === "engine" ? [0, 0.05] : p.stage === "model" ? [0.05, 0.85] : [0.9, 0.1];
-  return from + local * span;
+/** One line under a model while it installs: all its files together. */
+export function installProgressText(all: InstallProgress): string {
+  const parts = Object.values(all);
+  const total = parts.reduce((s, p) => s + p.total, 0);
+  if (parts.length && parts.every((p) => p.check)) {
+    const done = parts.reduce((s, p) => s + p.done, 0);
+    return `Проверка подлинности ${total ? Math.min(100, Math.floor((done / total) * 100)) : 0}%`;
+  }
+  // a file being checked has finished downloading
+  const done = parts.reduce((s, p) => s + (p.check ? p.total : p.done), 0);
+  if (!total) return done ? `Загрузка: ${formatBytes(done)}` : "Готовлю загрузку…";
+  return `Загрузка: ${formatBytes(done)} из ${formatBytes(total)} (${Math.min(100, Math.floor((done / total) * 100))}%)`;
+}
+
+/** Overall share of an installation, 0..1: downloading is the bulk, the sha256 pass the last tenth. */
+export function installFraction(all: InstallProgress): number {
+  const parts = Object.values(all);
+  const total = parts.reduce((s, p) => s + p.total, 0);
+  if (!total) return 0;
+  const got = parts.reduce((s, p) => s + (p.check ? p.total * 0.9 + Math.min(p.done, p.total) * 0.1 : Math.min(p.done, p.total) * 0.9), 0);
+  return Math.min(1, got / total);
 }
 
 /** A short label for how a model fits this computer. */

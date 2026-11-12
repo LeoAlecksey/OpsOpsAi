@@ -10,6 +10,8 @@ import {
   hardwareLine,
   installFraction,
   installProgressText,
+  withProgress,
+  type InstallProgress,
   skillById,
   titleFrom,
 } from "../../src/chatlogic";
@@ -63,18 +65,36 @@ describe("sizes and progress", () => {
     expect(formatBytes(10)).toBe("1 МБ");
   });
 
-  it("each stage says what is happening", () => {
-    const p = (over: Partial<ModelProgress>): ModelProgress => ({ id: "m", stage: "model", done: 2 ** 30, total: 4 * 2 ** 30, check: false, ...over });
-    expect(installProgressText(p({}))).toBe("Модель: 1,0 ГБ из 4,0 ГБ (25%)");
-    expect(installProgressText(p({ check: true, done: 2 * 2 ** 30 }))).toBe("Модель: проверка подлинности 50%");
-    expect(installProgressText(p({ stage: "engine", total: 0, done: 5 * 2 ** 20 }))).toBe("Движок: 5 МБ");
+  const ev = (stage: ModelProgress["stage"], done: number, total: number, check = false): ModelProgress => ({ id: "m", stage, done, total, check });
+  const G = 2 ** 30;
+
+  it("files downloading at once read as one installation", () => {
+    let all = withProgress(undefined, ev("model", G, 3 * G));
+    all = withProgress(all, ev("vision", 0, G));
+    expect(installProgressText(all)).toBe("Загрузка: 1,0 ГБ из 4,0 ГБ (25%)");
+    // the next event of a file replaces its previous one, not adds to it
+    all = withProgress(all, ev("vision", G / 2, G));
+    expect(installProgressText(all)).toBe("Загрузка: 1,5 ГБ из 4,0 ГБ (37%)");
+    // a file in its check counts as downloaded
+    all = withProgress(all, ev("vision", 0, G, true));
+    expect(installProgressText(all)).toBe("Загрузка: 2,0 ГБ из 4,0 ГБ (50%)");
+    all = withProgress(all, ev("model", 3 * G, 3 * G, true));
+    expect(installProgressText(all)).toBe("Проверка подлинности 75%");
+    expect(installProgressText({})).toBe("Готовлю загрузку…");
+    expect(installProgressText(withProgress(undefined, ev("engine", 5 * 2 ** 20, 0)))).toBe("Загрузка: 5 МБ");
   });
 
-  it("the overall bar only moves forward across stages", () => {
-    const at = (stage: ModelProgress["stage"], done: number, check = false) => installFraction({ id: "m", stage, done, total: 100, check });
-    const seq = [at("engine", 0), at("engine", 100), at("engine", 100, true), at("model", 0), at("model", 50), at("model", 100, true), at("vision", 0), at("vision", 100, true)];
-    for (let i = 1; i < seq.length; i++) expect(seq[i]!).toBeGreaterThanOrEqual(seq[i - 1]!);
+  it("the overall bar only moves forward and ends full", () => {
+    const steps: ModelProgress[] = [
+      ev("model", 0, 100), ev("engine", 0, 10), ev("vision", 0, 30), ev("engine", 10, 10),
+      ev("engine", 10, 10, true), ev("model", 50, 100), ev("vision", 30, 30, true), ev("model", 100, 100, true),
+    ];
+    let all: InstallProgress = {};
+    const seq = steps.map((p) => installFraction((all = withProgress(all, p))));
+    // a newly seen file adds to the total, so only compare once all three are known
+    for (let i = 3; i < seq.length; i++) expect(seq[i]!).toBeGreaterThanOrEqual(seq[i - 1]!);
     expect(seq.at(-1)).toBeCloseTo(1);
+    expect(installFraction({})).toBe(0);
   });
 });
 

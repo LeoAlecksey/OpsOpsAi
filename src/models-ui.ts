@@ -13,9 +13,8 @@ import {
   onModelEvents,
   type ModelItem,
   type ModelList,
-  type ModelProgress,
 } from "./ipc";
-import { fitLabel, formatBytes, hardwareLine, installFraction, installProgressText } from "./chatlogic";
+import { fitLabel, formatBytes, hardwareLine, installFraction, installProgressText, withProgress, type InstallProgress } from "./chatlogic";
 import { escapeHtml } from "./view";
 
 export interface ModelsApi {
@@ -27,7 +26,7 @@ export interface ModelsApi {
   onChange(fn: (list: ModelList | null) => void): void;
 }
 
-function card(m: ModelItem, selected: string | null, progress: ModelProgress | undefined, error: string | undefined): string {
+function card(m: ModelItem, selected: string | null, progress: InstallProgress | undefined, error: string | undefined): string {
   const badges = [
     `<span class="badge">${formatBytes(m.size)}</span>`,
     `<span class="badge">от ${m.ramGb} ГБ памяти</span>`,
@@ -67,7 +66,7 @@ export function mountModels(root: HTMLElement): ModelsApi {
   const body = root.querySelector<HTMLElement>("#models-body")!;
   const hwLine = root.querySelector<HTMLElement>("#models-hw")!;
   let list: ModelList | null = null;
-  const progress = new Map<string, ModelProgress>();
+  const progress = new Map<string, InstallProgress>();
   const errors = new Map<string, string>();
   const listeners: ((l: ModelList | null) => void)[] = [];
   let confirmRemove: string | null = null;
@@ -117,7 +116,7 @@ export function mountModels(root: HTMLElement): ModelsApi {
       }).finally(() => void refresh());
     if (act === "install") {
       errors.delete(id);
-      progress.set(id, { id, stage: "engine", done: 0, total: 0, check: false });
+      progress.set(id, {});
       render();
       void run(modelInstall(id), "install");
     } else if (act === "cancel") {
@@ -135,7 +134,7 @@ export function mountModels(root: HTMLElement): ModelsApi {
 
   void onModelEvents({
     progress: (p) => {
-      progress.set(p.id, p);
+      progress.set(p.id, withProgress(progress.get(p.id), p));
       // a light update while bytes arrive: no full re-render needed when the window is closed
       if (dialog.open) render();
     },

@@ -1,6 +1,6 @@
 [package]
 name = "opsopsai"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "OpsOpsAi — desktop app for local AI and agents (Tauri backend)"
 license-file = "../LICENSE"
