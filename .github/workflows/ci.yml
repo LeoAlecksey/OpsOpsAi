@@ -70,12 +70,15 @@ jobs:
         run: cargo clippy --lib --tests --locked -- -D warnings
       - working-directory: src-tauri
         run: cargo test --lib --locked
+      # a prebuilt cargo-audit: building it from source took ~7 minutes of every run
+      - uses: taiki-e/install-action@v2
+        if: runner.os == 'Linux'
+        with:
+          tool: cargo-audit
       - name: cargo audit
         if: runner.os == 'Linux'
         working-directory: src-tauri
-        run: |
-          cargo install cargo-audit --locked
-          cargo audit
+        run: cargo audit
 
   # the real engine and a real small model on every OS: download with the pinned sha256, unpack,
   # start, answer text and a picture, refuse a request without the token
