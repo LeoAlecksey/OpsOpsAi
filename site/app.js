@@ -1,6 +1,11 @@
 // Download links from the latest GitHub release, and the main button for the visitor's system.
 // Without JavaScript or when GitHub does not answer, every link leads to the release page.
 (() => {
+  // a promo code past its date would only disappoint: hide it
+  for (const el of document.querySelectorAll("[data-until]")) {
+    if (Date.now() > Date.parse(el.dataset.until)) el.remove();
+  }
+
   const REPO = "LeoAlecksey/OpsOpsAi";
   const RELEASES = `https://github.com/${REPO}/releases/latest`;
 

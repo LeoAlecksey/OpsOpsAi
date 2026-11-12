@@ -120,7 +120,7 @@ h1 { font-size: clamp(40px, 6.2vw, 80px); line-height: 1.02; letter-spacing: -0.
 }
 
 /* ---------- content sections ---------- */
-.status, .principles, .start, .downloads { padding-top: clamp(72px, 10vw, 128px) !important; }
+.status, .principles, .start, .courses, .downloads { padding-top: clamp(72px, 10vw, 128px) !important; }
 .section-lead { max-width: var(--measure); margin-top: 14px; color: var(--text-2); }
 
 .status-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 64px; margin-top: 40px; }
@@ -149,6 +149,26 @@ h1 { font-size: clamp(40px, 6.2vw, 80px); line-height: 1.02; letter-spacing: -0.
 .dl-list a { font-weight: 500; white-space: nowrap; }
 .dl-list .dl-more { display: flex; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
 .fine { max-width: var(--measure); margin-top: 20px; color: var(--muted); font-size: 14px; }
+
+/* ---------- courses ---------- */
+.course-hint { margin-top: 10px; color: var(--text-2); font-size: 15px; }
+.course-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 64px; margin-top: 40px; }
+.course { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 2px solid var(--line); }
+.course p { max-width: 54ch; color: var(--text-2); }
+.course .course-meta { color: var(--muted); font-size: 15px; }
+.promo-code { color: var(--mint) !important; font-size: 15px; }
+.promo-code b { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; letter-spacing: 0.04em; }
+.btn-course {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--lilac);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+.btn-course:hover { background: rgba(155, 140, 255, 0.14); color: var(--text); }
 
 /* ---------- support ---------- */
 .support {
@@ -206,7 +226,7 @@ h1 { font-size: clamp(40px, 6.2vw, 80px); line-height: 1.02; letter-spacing: -0.
 /* ---------- small screens ---------- */
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; align-items: start; }
-  .status-cols, .principles dl, .steps { grid-template-columns: 1fr; }
+  .status-cols, .principles dl, .steps, .course-list { grid-template-columns: 1fr; }
   .nav nav { gap: 16px; }
   .nav nav a:not(:last-child) { display: none; }
   .dl-list li { grid-template-columns: 1fr auto; }
