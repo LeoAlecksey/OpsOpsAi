@@ -291,6 +291,14 @@ fn last_lines(text: &str, n: usize) -> String {
 
 /// The line of the engine's output that says what went wrong, for the user.
 fn reason(tail: &str) -> String {
+    // The prebuilt llama.cpp for Linux needs a newer glibc than some distributions ship
+    // (the ARM64 build wants 2.38, Ubuntu 22.04 has 2.35): the raw loader line means nothing to a user.
+    if let Some(at) = tail.find("`GLIBC_") {
+        let ver: String = tail[at + 7..].chars().take_while(|c| c.is_ascii_digit() || *c == '.').collect();
+        return format!(
+            ": движку нужна более новая система — glibc {ver} или новее (например, Ubuntu 24.04 или Debian 13). Обновите систему или используйте другой компьютер"
+        );
+    }
     tail.lines()
         .rev()
         .find(|l| {
@@ -405,6 +413,10 @@ mod tests {
         assert_eq!(last_lines(out, 2), "main: error: failed to load model '/m/q.gguf'\nbye");
         assert_eq!(reason(&last_lines(out, 12)), ": main: error: failed to load model '/m/q.gguf'");
         assert_eq!(reason("all good"), "");
+        let glibc = "/e/llama-server: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found (required by /e/llama-server)";
+        let r = reason(glibc);
+        assert!(r.contains("glibc 2.38 или новее"), "{r}");
+        assert!(!r.contains("/lib/"), "{r}");
     }
 
     #[test]

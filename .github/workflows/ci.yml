@@ -88,7 +88,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, windows-2022, macos-latest]
+        # the prebuilt llama.cpp for ARM64 Linux needs glibc 2.38, which Ubuntu 22.04 lacks
+        os: [ubuntu-22.04, ubuntu-24.04-arm, windows-2022, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     steps:
